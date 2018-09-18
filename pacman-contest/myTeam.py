@@ -38,12 +38,15 @@ def createTeam(firstIndex, secondIndex, isRed,
   behavior is what you want for the nightly contest.
   """
 
+  # we need to reference here our agents for pacman / ghosts
   # The following line is an example only; feel free to change it.
   return [eval(first)(firstIndex), eval(second)(secondIndex)]
 
 ##########
 # Agents #
 ##########
+
+# do we need to create 2 classes - agents, right? test test
 
 class DummyAgent(CaptureAgent):
   """
@@ -76,7 +79,7 @@ class DummyAgent(CaptureAgent):
     '''
     Your initialization code goes here, if you need any.
     '''
-
+    # we need to define initial state
 
   def chooseAction(self, gameState):
     """
