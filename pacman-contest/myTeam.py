@@ -46,7 +46,7 @@ def createTeam(firstIndex, secondIndex, isRed,
 # Agents #
 ##########
 
-# do we need to create 2 classes - agents, right? test test
+# do we need to create 2 classes - agents, right? test test test
 
 class DummyAgent(CaptureAgent):
   """
