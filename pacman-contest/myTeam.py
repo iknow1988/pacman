@@ -228,3 +228,61 @@ class TestDefensiveReflexAgent(TestReflexCaptureAgent):
 
   def getWeights(self, gameState, action):
     return {'numInvaders': -1000, 'onDefense': 100, 'invaderDistance': -10, 'stop': -100, 'reverse': -2}
+
+
+
+
+random.seed(20180921)
+
+def kmeans(myFood, parameter=6):
+    """
+    
+    myFood is grid variable defined in capture
+       parameter is used to determine how many foods needed for a center. 
+       amount of food / parameter = round down to k
+       e.g  20 foods with parameter=6 gives 3 centers(round down to 3)
+            20 foods with parameter=5 gives 4 centers
+       
+    """
+    width=myFood.width
+    height=myFood.height
+    
+    foodlist=[]
+    for i in range(width):
+        for j in range(height):
+            if myFood[i][j]==True:
+                foodlist.append((i,j))    
+    k=max(1,len(foodlist)/parameter)
+    if len(foodlist)>0:
+        centers_=random.sample(foodlist,k)    
+        centers=[(i,1) for i in centers_]
+     
+        while(1):
+            new_clusters=[]
+            for i in centers:
+                new_clusters.append([i[0]])
+        
+            new_centers=[]
+            for i in foodlist:
+                distance=distanceCalculator.manhattanDistance(i,centers[0][0])
+                index=0
+                for j in range(1,len(centers)):
+                    dis=distanceCalculator.manhattanDistance(i,centers[j][0])
+                    if dis<distance:
+                        distance=dis
+                        index=j
+                new_clusters[index].append(i)
+            
+            for i in range(len(new_clusters)):
+                x_leng=0
+                y_leng=0
+                for j in range(len(new_clusters[i])):
+                    x_leng+=new_clusters[i][j][0]
+                    y_leng+=new_clusters[i][j][1]
+                new_centers.append(((x_leng/len(new_clusters[i]),y_leng/len(new_clusters[i])),len(new_clusters[i])))
+            if (new_centers==centers):
+                break;
+            centers=new_centers 
+    return new_centers
+
+
