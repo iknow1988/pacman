@@ -235,34 +235,26 @@ class TestDefensiveReflexAgent(TestReflexCaptureAgent):
 random.seed(20180921)
 
 def kmeans(myFood, parameter=6):
-    """
-    
+    """    
     myFood is grid variable defined in capture
        parameter is used to determine how many foods needed for a center. 
        amount of food / parameter = round down to k
        e.g  20 foods with parameter=6 gives 3 centers(round down to 3)
             20 foods with parameter=5 gives 4 centers
-       
     """
     width=myFood.width
-    height=myFood.height
-    
-    foodlist=[]
-    for i in range(width):
-        for j in range(height):
-            if myFood[i][j]==True:
-                foodlist.append((i,j))    
+    height=myFood.height    
+    foodlist=[(i,j) for i in range(width) for j in range(height) if myFood[i][j]==True]   
     k=max(1,len(foodlist)/parameter)
+    
     if len(foodlist)>0:
         centers_=random.sample(foodlist,k)    
         centers=[(i,1) for i in centers_]
      
         while(1):
-            new_clusters=[]
-            for i in centers:
-                new_clusters.append([i[0]])
-        
+            new_clusters=[[i[0]] for i in centers]
             new_centers=[]
+            
             for i in foodlist:
                 distance=distanceCalculator.manhattanDistance(i,centers[0][0])
                 index=0
@@ -284,5 +276,4 @@ def kmeans(myFood, parameter=6):
                 break;
             centers=new_centers 
     return new_centers
-
 
