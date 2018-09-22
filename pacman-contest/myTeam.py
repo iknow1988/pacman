@@ -25,7 +25,7 @@ from util import nearestPoint
 #################
 
 def createTeam(firstIndex, secondIndex, isRed,
-               first = 'TestOffensiveReflexAgent', second = 'TestDefensiveReflexAgent'):
+               first = 'Attacker', second = 'TestDefensiveReflexAgent'):
   """
   This function should return a list of two agents that will form the
   team, initialized using firstIndex and secondIndex as their agent
@@ -228,3 +228,238 @@ class TestDefensiveReflexAgent(TestReflexCaptureAgent):
 
   def getWeights(self, gameState, action):
     return {'numInvaders': -1000, 'onDefense': 100, 'invaderDistance': -10, 'stop': -100, 'reverse': -2}
+
+<<<<<<< HEAD
+# experimental test with MCT
+class MCTBasedAgent(CaptureAgent):
+  def getSuccessor(self, gameState, action):
+    """
+    Finds the next successor which is a grid position (location tuple).
+    """
+    successor = gameState.generateSuccessor(self.index, action)
+    pos = successor.getAgentState(self.index).getPosition()
+    if pos != nearestPoint(pos):
+      return successor.generateSuccessor(self.index, action)
+    else:
+      return successor
+
+  def evaluate(self, gameState, action):
+    """
+    Computes a linear combination of features and feature weights
+    """
+    features = self.getFeatures(gameState, action)
+    weights = self.getWeights(gameState, action)
+    
+    
+    return features * weights
+
+  def getFeatures(self, gameState, action):
+    features = util.Counter()
+    successor = self.getSuccessor(gameState, action)
+    features['successorScore'] = self.getScore(successor)
+    return features
+
+  def getWeights(self, gameState, action):
+    return {'successorScore': 1.0}
+
+class Attacker(EvaluationBasedAgent):
+  
+  def getFeatures(self, gameState, action):
+    """
+    Get features used for state evaluation.
+    """
+    features = util.Counter()
+    successor = self.getSuccessor(gameState, action)
+    # Compute score from successor state
+    features['successorScore'] = self.getScore(gameState)
+    #if gameState.getAgentState(self.index).numCarrying > 1:
+    #  features['successorScore'] = self.getScore(gameState)
+    #else:
+    #  features['successorScore'] = -len(self.getFood(gameState).asList())
+
+    # Compute distance to the nearest food
+    foodList = self.getFood(successor).asList()
+    if len(foodList) > 0:
+      myPos = successor.getAgentState(self.index).getPosition()
+      minDistance = min([self.getMazeDistance(myPos, food) for food in foodList])
+      features['distanceToFood'] = minDistance
+
+    # Compute distance to closest ghost
+    myPos = successor.getAgentState(self.index).getPosition()
+    enemies  = [successor.getAgentState(i) for i in self.getOpponents(successor)]
+    inRange = filter(lambda x: not x.isPacman and x.getPosition() != None, enemies)
+    if len(inRange) > 0:
+      positions = [agent.getPosition() for agent in inRange]
+      closest = min(positions, key = lambda x: self.getMazeDistance(myPos, x))
+      closestDist = self.getMazeDistance(myPos, closest)
+      if closestDist <= 5:
+        features['distanceToGhost'] = closestDist
+
+    # Compute if is pacman
+    features['isPacman'] = 1 if successor.getAgentState(self.index).isPacman else 0
+
+    #if features['isPacman']==1:
+    #  print "Agent:",self.index,features
+    #if successor.getAgentState(self.index).isPacman:
+      #print self.numEnemyFood,len(self.getFoodYouAreDefending(gameState).asList()),self.getScore(gameState),"-->",len(self.getFood(successor).asList())
+      #print 20-self.numEnemyFood,self.getScore(gameState)-len(self.getFoodYouAreDefending(gameState).asList())
+    #print self.index,self.numEnemyFood,len(self.getFoodYouAreDefending(gameState).asList()),features['successorScore']
+    return features
+
+  def getWeights(self, gameState, action):
+    """
+    Get weights for the features used in the evaluation.
+    """
+    # If tha agent is locked, we will make him try and atack
+    if self.inactiveTime > 80:
+      return {'successorScore': 200, 'distanceToFood': -5, 'distanceToGhost': 2, 'isPacman': 1000}
+
+    # If opponent is scared, the agent should not care about distanceToGhost
+    successor = self.getSuccessor(gameState, action)
+    myPos = successor.getAgentState(self.index).getPosition()
+    enemies  = [successor.getAgentState(i) for i in self.getOpponents(successor)]
+    inRange = filter(lambda x: not x.isPacman and x.getPosition() != None, enemies)
+    if len(inRange) > 0:
+      positions = [agent.getPosition() for agent in inRange]
+      closestPos = min(positions, key = lambda x: self.getMazeDistance(myPos, x))
+      closestDist = self.getMazeDistance(myPos, closestPos)
+      closest_enemies = filter(lambda x: x[0] == closestPos, zip(positions, inRange))
+      for agent in closest_enemies:
+        if agent[1].scaredTimer > 0:
+          #print "Weights: Scared timer"
+          return {'successorScore': 200, 'distanceToFood': -5, 'distanceToGhost': 0, 'isPacman': 0}
+
+   
+    #return {'successorScore': 200, 'distanceToFood': -5, 'distanceToGhost': 2, 'isPacman': 0}
+    return {'successorScore': 200, 'distanceToFood': -5, 'distanceToGhost': 2, 'isPacman': 0}
+
+
+  def randomSimulation(self, depth, gameState):
+    """
+    Random simulate some actions for the agent. The actions other agents can take
+    are ignored, or, in other words, we consider their actions is always STOP.
+    The final state from the simulation is evaluated.
+    """
+    new_state = gameState.deepCopy()
+    while depth > 0:
+      # Get valid actions
+      actions = new_state.getLegalActions(self.index)
+      # The agent should not stop in the simulation
+      actions.remove(Directions.STOP)
+      current_direction = new_state.getAgentState(self.index).configuration.direction
+      # The agent should not use the reverse direction during simulation
+      reversed_direction = Directions.REVERSE[new_state.getAgentState(self.index).configuration.direction]
+      if reversed_direction in actions and len(actions) > 1:
+        actions.remove(reversed_direction)
+      # Randomly chooses a valid action
+      a = random.choice(actions)
+      # Compute new state and update depth
+      new_state = new_state.generateSuccessor(self.index, a)
+      depth -= 1
+    # Evaluate the final simulation state
+    return self.evaluate(new_state, Directions.STOP)
+
+  def __init__(self, index):
+    CaptureAgent.__init__(self, index)
+    # Variables used to verify if the agent is locked
+    self.numEnemyFood = "+inf"
+    self.inactiveTime = 0
+
+  # (15s max).
+  def registerInitialState(self, gameState):
+    CaptureAgent.registerInitialState(self, gameState)
+    self.distancer.getMazeDistances()
+
+  #  (1s max).
+  def chooseAction(self, gameState):
+    # You can profile your evaluation time by uncommenting these lines
+    start = time.time()
+
+    # Updates inactiveTime. This variable indicates if the agent is locked.
+    currentEnemyFood = len(self.getFood(gameState).asList())
+    if self.numEnemyFood != currentEnemyFood:
+      self.numEnemyFood = currentEnemyFood
+      self.inactiveTime = 0
+    else:
+      self.inactiveTime += 1
+      
+    # If the agent dies, inactiveTime is reseted.
+    if gameState.getInitialAgentPosition(self.index) == gameState.getAgentState(self.index).getPosition():
+      self.inactiveTime = 0
+
+    # Get valid actions. Staying put is almost never a good choice, so
+    # the agent will ignore this action.
+    all_actions = gameState.getLegalActions(self.index)
+    all_actions.remove(Directions.STOP)
+
+    qvalues = []
+    q_a_s={}
+    for a in all_actions:
+      new_state = gameState.generateSuccessor(self.index, a)
+      sim_value = 0
+      for iteration in range(30):
+        sim_value += self.randomSimulation(15, new_state)
+      qvalues.append(sim_value)
+      q_a_s[a]=sim_value
+
+    best_q=max(q_a_s, key=q_a_s.get)  
+    best = max(qvalues)
+    
+    
+    ties = filter(lambda x: x[0] == best, zip(qvalues, all_actions))
+    next_play = random.choice(ties)[1]
+
+
+    #next_play=best_q
+    #print 'eval time for offensive agent %d: %.4f, Action:%s' % (self.index, time.time() - start,next_play)
+    return next_play
+=======
+
+
+
+random.seed(20180921)
+
+def kmeans(myFood, parameter=6):
+    """    
+    myFood is grid variable defined in capture
+       parameter is used to determine how many foods needed for a center. 
+       amount of food / parameter = round down to k
+       e.g  20 foods with parameter=6 gives 3 centers(round down to 3)
+            20 foods with parameter=5 gives 4 centers
+    """
+    width=myFood.width
+    height=myFood.height    
+    foodlist=[(i,j) for i in range(width) for j in range(height) if myFood[i][j]==True]   
+    k=max(1,len(foodlist)/parameter)
+    
+    if len(foodlist)>0:
+        centers_=random.sample(foodlist,k)    
+        centers=[(i,1) for i in centers_]
+     
+        while(1):
+            new_clusters=[[i[0]] for i in centers]
+            new_centers=[]
+            
+            for i in foodlist:
+                distance=distanceCalculator.manhattanDistance(i,centers[0][0])
+                index=0
+                for j in range(1,len(centers)):
+                    dis=distanceCalculator.manhattanDistance(i,centers[j][0])
+                    if dis<distance:
+                        distance=dis
+                        index=j
+                new_clusters[index].append(i)
+            
+            for i in range(len(new_clusters)):
+                x_leng=0
+                y_leng=0
+                for j in range(len(new_clusters[i])):
+                    x_leng+=new_clusters[i][j][0]
+                    y_leng+=new_clusters[i][j][1]
+                new_centers.append(((x_leng/len(new_clusters[i]),y_leng/len(new_clusters[i])),len(new_clusters[i])))
+            if (new_centers==centers):
+                break;
+            centers=new_centers 
+    return new_centers
+
+>>>>>>> 86f88219f03d859879ceeee4ebef80061f10debd
