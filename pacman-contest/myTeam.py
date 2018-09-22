@@ -263,7 +263,7 @@ class MCTBasedAgent(CaptureAgent):
   def getWeights(self, gameState, action):
     return {'successorScore': 1.0}
 
-class Attacker(EvaluationBasedAgent):
+class Attacker(MCTBasedAgent):
   
   def getFeatures(self, gameState, action):
     """
