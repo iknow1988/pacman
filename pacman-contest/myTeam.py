@@ -229,8 +229,7 @@ class TestDefensiveReflexAgent(TestReflexCaptureAgent):
   def getWeights(self, gameState, action):
     return {'numInvaders': -1000, 'onDefense': 100, 'invaderDistance': -10, 'stop': -100, 'reverse': -2}
 
-<<<<<<< HEAD
-<<<<<<< HEAD
+
 # experimental test with MCT
 class MCTBasedAgent(CaptureAgent):
   def getSuccessor(self, gameState, action):
