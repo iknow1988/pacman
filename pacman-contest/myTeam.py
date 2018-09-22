@@ -414,10 +414,6 @@ class Attacker(MCTBasedAgent):
     #next_play=best_q
     #print 'eval time for offensive agent %d: %.4f, Action:%s' % (self.index, time.time() - start,next_play)
     return next_play
-=======
-=======
->>>>>>> 86f88219f03d859879ceeee4ebef80061f10debd
-
 
 
 random.seed(20180921)
@@ -464,8 +460,3 @@ def kmeans(myFood, parameter=6):
                 break;
             centers=new_centers 
     return new_centers
-
-<<<<<<< HEAD
->>>>>>> 86f88219f03d859879ceeee4ebef80061f10debd
-=======
->>>>>>> 86f88219f03d859879ceeee4ebef80061f10debd
