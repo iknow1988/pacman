@@ -272,17 +272,27 @@ class OffensiveMCT(MCTBasedAgent):
     successor = self.getSuccessor(gameState, action)
     # Compute score from successor state
     features['successorScore'] = self.getScore(gameState)
-    #if gameState.getAgentState(self.index).numCarrying > 1:
-    #  features['successorScore'] = self.getScore(gameState)
-    #else:
-    #  features['successorScore'] = -len(self.getFood(gameState).asList())
+    
+    if self.food_carrying >self.MAX_FOOD_CARRYING:
+      features['successorScore'] = self.getScore(gameState)
+    else:
+      features['successorScore'] = -len(self.getFood(gameState).asList())
 
-    # Compute distance to the nearest food
+    # Compute distance to the nearest food. If it's in mode safe it shouldnt look for food.
     foodList = self.getFood(successor).asList()
-    if len(foodList) > 0:
+    if len(foodList) > 0 and self.food_carrying <self.MAX_FOOD_CARRYING:
       myPos = successor.getAgentState(self.index).getPosition()
       minDistance = min([self.getMazeDistance(myPos, food) for food in foodList])
       features['distanceToFood'] = minDistance
+
+    # compute distance to the nearest cluster of food   
+    if len(foodList) > 0 and self.food_carrying <self.MAX_FOOD_CARRYING:
+      successor_food_clusters=kmeans(self.getFood(successor),3)
+      best_food_cluster=max(successor_food_clusters,key=lambda item:item[1])[0]
+      myPos = successor.getAgentState(self.index).getPosition()
+      distance_to_food_cluster = self.getMazeDistance(myPos, best_food_cluster)
+      features['distanceToFoodCluster'] = distance_to_food_cluster
+
 
     # Compute distance to closest ghost
     myPos = successor.getAgentState(self.index).getPosition()
@@ -320,7 +330,7 @@ class OffensiveMCT(MCTBasedAgent):
 
    
     #return {'successorScore': 200, 'distanceToFood': -5, 'distanceToGhost': 2, 'isPacman': 0}
-    return {'successorScore': 200, 'distanceToFood': -5, 'distanceToGhost': 2, 'isPacman': 0}
+    return {'successorScore': 200, 'distanceToFood': -5,'distanceToFoodCluster':-5, 'distanceToGhost': 2, 'isPacman': 0}
 
 
   def randomSimulation(self, depth, gameState):
@@ -351,8 +361,9 @@ class OffensiveMCT(MCTBasedAgent):
 
   def __init__(self, index):
     CaptureAgent.__init__(self, index)
-    self.num_iterations=30
-    self.num_exploration=20
+    self.MAX_ITERATIONS=30
+    self.MAX_EXPLORATION=20
+    self.MAX_FOOD_CARRYING=2
     # Variables used to verify if the agent is locked
     
   # (15s max).
@@ -370,15 +381,16 @@ class OffensiveMCT(MCTBasedAgent):
     # the agent will ignore this action.
     all_actions = gameState.getLegalActions(self.index)
     all_actions.remove(Directions.STOP)
-    #test=kmeans(self.getFood(gameState),5)
-    #print test
+    
+    self.food_carrying=gameState.getAgentState(self.index).numCarrying
+
     
     q_a_s={}
     for a in all_actions:
       new_state = gameState.generateSuccessor(self.index, a)
       sim_value = 0
-      for iteration in range(self.num_iterations):
-        sim_value += self.randomSimulation(self.num_exploration, new_state)
+      for iteration in range(self.MAX_ITERATIONS):
+        sim_value += self.randomSimulation(self.MAX_EXPLORATION, new_state)
       q_a_s[a]=sim_value
 
     next_play=max(q_a_s, key=q_a_s.get)  
@@ -399,7 +411,7 @@ def kmeans(myFood, parameter=6):
        e.g  20 foods with parameter=6 gives 3 centers(round down to 3)
             20 foods with parameter=5 gives 4 centers
     """
-    print myFood
+    
     width=myFood.width
     height=myFood.height    
     foodlist=[(i,j) for i in range(width) for j in range(height) if myFood[i][j]==True]   
