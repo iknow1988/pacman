@@ -400,7 +400,7 @@ class OffensiveMCT(MCTBasedAgent):
     return next_play
 
 
-random.seed(20180921)
+
 
 
 def kmeans(myFood, parameter=6):
@@ -411,7 +411,7 @@ def kmeans(myFood, parameter=6):
        e.g  20 foods with parameter=6 gives 3 centers(round down to 3)
             20 foods with parameter=5 gives 4 centers
     """
-    
+    random.seed(20180921)
     width=myFood.width
     height=myFood.height    
     foodlist=[(i,j) for i in range(width) for j in range(height) if myFood[i][j]==True]   
