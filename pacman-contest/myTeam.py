@@ -25,7 +25,7 @@ from util import nearestPoint
 #################
 
 def createTeam(firstIndex, secondIndex, isRed,
-               first = 'Attacker', second = 'TestDefensiveReflexAgent'):
+               first = 'OffensiveMCT', second = 'TestDefensiveReflexAgent'):
   """
   This function should return a list of two agents that will form the
   team, initialized using firstIndex and secondIndex as their agent
@@ -262,7 +262,7 @@ class MCTBasedAgent(CaptureAgent):
   def getWeights(self, gameState, action):
     return {'successorScore': 1.0}
 
-class Attacker(MCTBasedAgent):
+class OffensiveMCT(MCTBasedAgent):
   
   def getFeatures(self, gameState, action):
     """
@@ -298,23 +298,13 @@ class Attacker(MCTBasedAgent):
     # Compute if is pacman
     features['isPacman'] = 1 if successor.getAgentState(self.index).isPacman else 0
 
-    #if features['isPacman']==1:
-    #  print "Agent:",self.index,features
-    #if successor.getAgentState(self.index).isPacman:
-      #print self.numEnemyFood,len(self.getFoodYouAreDefending(gameState).asList()),self.getScore(gameState),"-->",len(self.getFood(successor).asList())
-      #print 20-self.numEnemyFood,self.getScore(gameState)-len(self.getFoodYouAreDefending(gameState).asList())
-    #print self.index,self.numEnemyFood,len(self.getFoodYouAreDefending(gameState).asList()),features['successorScore']
     return features
 
   def getWeights(self, gameState, action):
     """
     Get weights for the features used in the evaluation.
     """
-    # If tha agent is locked, we will make him try and atack
-    if self.inactiveTime > 80:
-      return {'successorScore': 200, 'distanceToFood': -5, 'distanceToGhost': 2, 'isPacman': 1000}
-
-    # If opponent is scared, the agent should not care about distanceToGhost
+    
     successor = self.getSuccessor(gameState, action)
     myPos = successor.getAgentState(self.index).getPosition()
     enemies  = [successor.getAgentState(i) for i in self.getOpponents(successor)]
@@ -326,7 +316,6 @@ class Attacker(MCTBasedAgent):
       closest_enemies = filter(lambda x: x[0] == closestPos, zip(positions, inRange))
       for agent in closest_enemies:
         if agent[1].scaredTimer > 0:
-          #print "Weights: Scared timer"
           return {'successorScore': 200, 'distanceToFood': -5, 'distanceToGhost': 0, 'isPacman': 0}
 
    
@@ -347,8 +336,9 @@ class Attacker(MCTBasedAgent):
       # The agent should not stop in the simulation
       actions.remove(Directions.STOP)
       current_direction = new_state.getAgentState(self.index).configuration.direction
-      # The agent should not use the reverse direction during simulation
-      reversed_direction = Directions.REVERSE[new_state.getAgentState(self.index).configuration.direction]
+      # get the reversed direction for the current direction
+      reversed_direction = Directions.REVERSE[current_direction]
+      # if is not the only move possible then discard it
       if reversed_direction in actions and len(actions) > 1:
         actions.remove(reversed_direction)
       # Randomly chooses a valid action
@@ -361,13 +351,14 @@ class Attacker(MCTBasedAgent):
 
   def __init__(self, index):
     CaptureAgent.__init__(self, index)
+    self.num_iterations=30
+    self.num_exploration=20
     # Variables used to verify if the agent is locked
-    self.numEnemyFood = "+inf"
-    self.inactiveTime = 0
-
+    
   # (15s max).
   def registerInitialState(self, gameState):
     CaptureAgent.registerInitialState(self, gameState)
+    # calculate all the distances
     self.distancer.getMazeDistances()
 
   #  (1s max).
@@ -375,47 +366,30 @@ class Attacker(MCTBasedAgent):
     # You can profile your evaluation time by uncommenting these lines
     start = time.time()
 
-    # Updates inactiveTime. This variable indicates if the agent is locked.
-    currentEnemyFood = len(self.getFood(gameState).asList())
-    if self.numEnemyFood != currentEnemyFood:
-      self.numEnemyFood = currentEnemyFood
-      self.inactiveTime = 0
-    else:
-      self.inactiveTime += 1
-      
-    # If the agent dies, inactiveTime is reseted.
-    if gameState.getInitialAgentPosition(self.index) == gameState.getAgentState(self.index).getPosition():
-      self.inactiveTime = 0
-
     # Get valid actions. Staying put is almost never a good choice, so
     # the agent will ignore this action.
     all_actions = gameState.getLegalActions(self.index)
     all_actions.remove(Directions.STOP)
-
-    qvalues = []
+    #test=kmeans(self.getFood(gameState),5)
+    #print test
+    
     q_a_s={}
     for a in all_actions:
       new_state = gameState.generateSuccessor(self.index, a)
       sim_value = 0
-      for iteration in range(30):
-        sim_value += self.randomSimulation(15, new_state)
-      qvalues.append(sim_value)
+      for iteration in range(self.num_iterations):
+        sim_value += self.randomSimulation(self.num_exploration, new_state)
       q_a_s[a]=sim_value
 
-    best_q=max(q_a_s, key=q_a_s.get)  
-    best = max(qvalues)
+    next_play=max(q_a_s, key=q_a_s.get)  
     
     
-    ties = filter(lambda x: x[0] == best, zip(qvalues, all_actions))
-    next_play = random.choice(ties)[1]
-
-
-    #next_play=best_q
     #print 'eval time for offensive agent %d: %.4f, Action:%s' % (self.index, time.time() - start,next_play)
     return next_play
 
 
 random.seed(20180921)
+
 
 def kmeans(myFood, parameter=6):
     """    
@@ -425,6 +399,7 @@ def kmeans(myFood, parameter=6):
        e.g  20 foods with parameter=6 gives 3 centers(round down to 3)
             20 foods with parameter=5 gives 4 centers
     """
+    print myFood
     width=myFood.width
     height=myFood.height    
     foodlist=[(i,j) for i in range(width) for j in range(height) if myFood[i][j]==True]   
