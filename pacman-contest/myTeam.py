@@ -412,6 +412,7 @@ def kmeans(myFood, parameter=6):
             20 foods with parameter=5 gives 4 centers
     """
     random.seed(20180921)
+    #print myFood
     width=myFood.width
     height=myFood.height    
     foodlist=[(i,j) for i in range(width) for j in range(height) if myFood[i][j]==True]   
@@ -441,7 +442,17 @@ def kmeans(myFood, parameter=6):
                 for j in range(len(new_clusters[i])):
                     x_leng+=new_clusters[i][j][0]
                     y_leng+=new_clusters[i][j][1]
-                new_centers.append(((x_leng/len(new_clusters[i]),y_leng/len(new_clusters[i])),len(new_clusters[i])))
+                    
+                
+                new_center=(x_leng/len(new_clusters[i]),y_leng/len(new_clusters[i]))
+                dis_close = 99999
+                close_food=new_clusters[i][0]
+                for j in range(len(new_clusters[i])): 
+                    dis2=distanceCalculator.manhattanDistance(new_clusters[i][j],new_center)
+                    if dis2<dis_close:
+                        dis_close=dis2
+                        close_food=new_clusters[i][j]
+                new_centers.append((close_food,len(new_clusters[i])))
             if (new_centers==centers):
                 break;
             centers=new_centers 
