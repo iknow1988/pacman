@@ -646,3 +646,40 @@ def kmeans(myFood, parameter=6):
                 break;
             centers=new_centers 
     return new_centers
+
+
+def getMissingFood(gmagent, gameState, steps=3):
+    """
+    This function gives the information of missing food within previous n(default=3) steps
+    
+    This function takes gameState as input and return a list [((1,3),1), ((1,4),2), (1,5),3)] 
+    this means the closest food to the food was eaten in the recent one step is at position (1,3), 
+    and the closest food to the food that is eaten in the previous 2 step is at (1,4),
+    and the closest food to the food that is eaten in the previous 3 step is at (1,5)
+    that is to say the opponents pacman may be move from (1,2)->(1,3)->(1,4) accordingly. 
+    
+    """
+    
+    itera=min((len(gmagent.observationHistory)-1), steps)
+    ret_list=[]
+    for x in range(1,itera+1):
+      index=-x
+      preind=index-1
+      curfoodlist=gmagent.getFoodYouAreDefending(gmagent.observationHistory[index]).asList()
+      prefoodlist=gmagent.getFoodYouAreDefending(gmagent.observationHistory[preind]).asList()
+      #print(curfoodlist)
+      #print(prefoodlist)
+      missingfoods=[i for i in prefoodlist if i not in curfoodlist]
+      if len(missingfoods)!=0:
+        missingfoods=missingfoods[0]
+        dist=9999999
+        food_pos=0
+        for food in prefoodlist:
+          if food !=missingfoods:
+            cur_dist=gmagent.getMazeDistance(missingfoods,food)
+            if cur_dist<dist:
+              dist=cur_dist
+              food_pos=food
+        ret_list.append((food_pos,x))
+    return ret_list 
+      
