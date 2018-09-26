@@ -24,6 +24,7 @@ from util import nearestPoint
 # Team creation #
 #################
 
+
 def createTeam(firstIndex, secondIndex, isRed,
                first = 'OffensiveMCT', second = 'TestDefensiveReflexAgent'):
   """
@@ -49,58 +50,12 @@ def createTeam(firstIndex, secondIndex, isRed,
 # Agents #
 ##########
 
-class DummyAgent(CaptureAgent):
-  """
-  A Dummy agent to serve as an example of the necessary agent structure.
-  You should look at baselineTeam.py for more details about how to
-  create an agent as this is the bare minimum.
-  """
-
-  def registerInitialState(self, gameState):
-    """
-    This method handles the initial setup of the
-    agent to populate useful fields (such as what team
-    we're on).
-
-    A distanceCalculator instance caches the maze distances
-    between each pair of positions, so your agents can use:
-    self.distancer.getDistance(p1, p2)
-
-    IMPORTANT: This method may run for at most 15 seconds.
-    """
-
-    '''
-    Make sure you do not delete the following line. If you would like to
-    use Manhattan distances instead of maze distances in order to save
-    on initialization time, please take a look at
-    CaptureAgent.registerInitialState in captureAgents.py.
-    '''
-    CaptureAgent.registerInitialState(self, gameState)
-
-    '''
-    Your initialization code goes here, if you need any.
-    '''
-    # we need to define initial state
-
-  def chooseAction(self, gameState):
-    """
-    Picks among actions randomly.
-    """
-    actions = gameState.getLegalActions(self.index)
-
-    '''
-    You should change this in your own agent.
-    '''
-
-    return random.choice(actions)
-
-
 # experimental test with baseline
 class TestReflexCaptureAgent(CaptureAgent):
   """
   A base class for reflex agents that chooses score-maximizing actions
   """
- 
+
   def registerInitialState(self, gameState):
     self.start = gameState.getAgentPosition(self.index)
     CaptureAgent.registerInitialState(self, gameState)
@@ -170,28 +125,9 @@ class TestReflexCaptureAgent(CaptureAgent):
     """
     return {'successorScore': 1.0}
 
-class TestOffensiveReflexAgent(TestReflexCaptureAgent):
-  """
-  A reflex agent that seeks food. This is an agent
-  we give you to get an idea of what an offensive agent might look like,
-  but it is by no means the best or only way to build an offensive agent.
-  """
-  def getFeatures(self, gameState, action):
-    features = util.Counter()
-    successor = self.getSuccessor(gameState, action)
-    foodList = self.getFood(successor).asList()    
-    features['successorScore'] = -len(foodList)#self.getScore(successor)
+  def getRemainingScareTime(gameState, agentIndex):
+    return gameState.getAgentState(agentIndex).scaredTimer
 
-    # Compute distance to the nearest food
-
-    if len(foodList) > 0: # This should always be True,  but better safe than sorry
-      myPos = successor.getAgentState(self.index).getPosition()
-      minDistance = min([self.getMazeDistance(myPos, food) for food in foodList])
-      features['distanceToFood'] = minDistance
-    return features
-
-  def getWeights(self, gameState, action):
-    return {'successorScore': 100, 'distanceToFood': -1}
 
 class TestDefensiveReflexAgent(TestReflexCaptureAgent):
   """
@@ -230,6 +166,7 @@ class TestDefensiveReflexAgent(TestReflexCaptureAgent):
     features['numInvaders'] = len(invaders)
     if len(invaders) > 0:
       dists = [self.getMazeDistance(myPos, a.getPosition()) for a in invaders]
+      # print dists
       features['invaderDistance'] = min(dists)
 
     if action == Directions.STOP: features['stop'] = 1
@@ -276,7 +213,7 @@ class MCTBasedAgent(CaptureAgent):
     return {'successorScore': 1.0}
 
 class OffensiveMCT(MCTBasedAgent):
-  
+
   def getFeatures(self, gameState, action):
     """
     Get features used for state evaluation.
@@ -285,7 +222,7 @@ class OffensiveMCT(MCTBasedAgent):
     successor = self.getSuccessor(gameState, action)
     # Compute score from successor state
     features['successorScore'] = self.getScore(gameState)
-    
+
     if self.food_carrying >=self.MAX_FOOD_CARRYING or len(self.getFood(gameState).asList())<=2:
       features['successorScore'] = self.getScore(gameState)
     else:
@@ -309,8 +246,8 @@ class OffensiveMCT(MCTBasedAgent):
       minDistance = min([self.getMazeDistance(myPos, food) for food in foodList])
       features['distanceToFood'] = minDistance
 
-    
-   
+
+
 
     # Compute distance to closest ghost
     myPos = successor.getAgentState(self.index).getPosition()
@@ -332,7 +269,7 @@ class OffensiveMCT(MCTBasedAgent):
     """
     Get weights for the features used in the evaluation.
     """
-    
+
     successor = self.getSuccessor(gameState, action)
     myPos = successor.getAgentState(self.index).getPosition()
     enemies  = [successor.getAgentState(i) for i in self.getOpponents(successor)]
@@ -346,7 +283,7 @@ class OffensiveMCT(MCTBasedAgent):
         if agent[1].scaredTimer > 0:
           return {'successorScore': 200, 'distanceToFood': -5, 'distanceToGhost': 0, 'isPacman': 0}
 
-   
+
     #return {'successorScore': 200, 'distanceToFood': -5, 'distanceToGhost': 2, 'isPacman': 0}
     return {'successorScore': 200, 'distanceToFood': -5, 'distanceToGhost': 2, 'isPacman': 0}
     #return {'successorScore': 200,'distanceToFood': -5, 'distanceToFoodCluster':-2, 'distanceToGhost': 2, 'isPacman': 0}
@@ -384,7 +321,7 @@ class OffensiveMCT(MCTBasedAgent):
     self.MAX_EXPLORATION=15
     self.MAX_FOOD_CARRYING=3
     # Variables used to verify if the agent is locked
-    
+
   # (15s max).
   def registerInitialState(self, gameState):
     CaptureAgent.registerInitialState(self, gameState)
@@ -394,16 +331,17 @@ class OffensiveMCT(MCTBasedAgent):
   #  (1s max).
   def chooseAction(self, gameState):
     # You can profile your evaluation time by uncommenting these lines
+    self.writeToFile(gameState)
     start = time.time()
 
     # Get valid actions. Staying put is almost never a good choice, so
     # the agent will ignore this action.
     all_actions = gameState.getLegalActions(self.index)
     all_actions.remove(Directions.STOP)
-    
+
     self.food_carrying=gameState.getAgentState(self.index).numCarrying
 
-    
+
     q_a_s={}
     for a in all_actions:
       new_state = gameState.generateSuccessor(self.index, a)
@@ -413,11 +351,19 @@ class OffensiveMCT(MCTBasedAgent):
       q_a_s[a]=sim_value
 
     #print "ACTIONS:",self.index,q_a_s
-    next_play=max(q_a_s, key=q_a_s.get)  
-    
-    
+    next_play=max(q_a_s, key=q_a_s.get)
+
+
     #print 'eval time for offensive agent %d: %.4f, Action:%s' % (self.index, time.time() - start,next_play)
     return next_play
+
+  def writeToFile(self, gameState):
+    food = self.getFood(gameState).asList()
+    opponentFood = self.getFoodYouAreDefending(gameState).asList()
+    score = self.getScore(gameState)
+    capsules = self.getCapsules(gameState)
+    capsulesOpponent = self.getCapsulesYouAreDefending(gameState)
+    print "Food:", len(food), "Defending Food :",len(opponentFood),"Score :",score
 
 
 # experimantal test with UCT
@@ -451,10 +397,10 @@ class UCTBasedAgent(CaptureAgent):
     return features
 
   def getWeights(self, gameState, action):
-    return {'successorScore': 1.0}  
+    return {'successorScore': 1.0}
 
 class OffensiveUCT(UCTBasedAgent):
-  
+
   def getFeatures(self, gameState, action):
     """
     Get features used for state evaluation.
@@ -463,7 +409,7 @@ class OffensiveUCT(UCTBasedAgent):
     successor = self.getSuccessor(gameState, action)
     # Compute score from successor state
     features['successorScore'] = self.getScore(gameState)
-    
+
     if self.food_carrying >=self.MAX_FOOD_CARRYING or len(self.getFood(gameState).asList())<=2:
       features['successorScore'] = self.getScore(gameState)
     else:
@@ -487,8 +433,8 @@ class OffensiveUCT(UCTBasedAgent):
       minDistance = min([self.getMazeDistance(myPos, food) for food in foodList])
       features['distanceToFood'] = minDistance
 
-    
-   
+
+
 
     # Compute distance to closest ghost
     myPos = successor.getAgentState(self.index).getPosition()
@@ -510,7 +456,7 @@ class OffensiveUCT(UCTBasedAgent):
     """
     Get weights for the features used in the evaluation.
     """
-    
+
     successor = self.getSuccessor(gameState, action)
     myPos = successor.getAgentState(self.index).getPosition()
     enemies  = [successor.getAgentState(i) for i in self.getOpponents(successor)]
@@ -524,7 +470,7 @@ class OffensiveUCT(UCTBasedAgent):
         if agent[1].scaredTimer > 0:
           return {'successorScore': 200, 'distanceToFood': -5, 'distanceToGhost': 0, 'isPacman': 0}
 
-   
+
     #return {'successorScore': 200, 'distanceToFood': -5, 'distanceToGhost': 2, 'isPacman': 0}
     return {'successorScore': 200, 'distanceToFood': -5, 'distanceToGhost': 2, 'isPacman': 0}
     #return {'successorScore': 200,'distanceToFood': -5, 'distanceToFoodCluster':-2, 'distanceToGhost': 2, 'isPacman': 0}
@@ -567,7 +513,7 @@ class OffensiveUCT(UCTBasedAgent):
     self.visited={}
     self.rewards={}
     # Variables used to verify if the agent is locked
-    
+
   # (15s max).
   def registerInitialState(self, gameState):
     CaptureAgent.registerInitialState(self, gameState)
@@ -583,10 +529,10 @@ class OffensiveUCT(UCTBasedAgent):
     # the agent will ignore this action.
     all_actions = gameState.getLegalActions(self.index)
     all_actions.remove(Directions.STOP)
-    
+
     self.food_carrying=gameState.getAgentState(self.index).numCarrying
 
-    
+
     q_a_s={}
     for a in all_actions:
       new_state = gameState.generateSuccessor(self.index, a)
@@ -596,18 +542,18 @@ class OffensiveUCT(UCTBasedAgent):
       q_a_s[a]=sim_value
 
     #print "ACTIONS:",self.index,q_a_s
-    next_play=max(q_a_s, key=q_a_s.get)  
-    
-    
+    next_play=max(q_a_s, key=q_a_s.get)
+
+
     #print 'eval time for offensive agent %d: %.4f, Action:%s' % (self.index, time.time() - start,next_play)
     return next_play
 
 
 
 def kmeans(myFood, parameter=6):
-    """    
+    """
     myFood is grid variable defined in capture
-       parameter is used to determine how many foods needed for a center. 
+       parameter is used to determine how many foods needed for a center.
        amount of food / parameter = round down to k
        e.g  20 foods with parameter=6 gives 3 centers(round down to 3)
             20 foods with parameter=5 gives 4 centers
@@ -615,18 +561,18 @@ def kmeans(myFood, parameter=6):
     random.seed(20180921)
     #print myFood
     width=myFood.width
-    height=myFood.height    
-    foodlist=[(i,j) for i in range(width) for j in range(height) if myFood[i][j]==True]   
+    height=myFood.height
+    foodlist=[(i,j) for i in range(width) for j in range(height) if myFood[i][j]==True]
     k=max(1,len(foodlist)/parameter)
-    
+
     if len(foodlist)>0:
-        centers_=random.sample(foodlist,k)    
+        centers_=random.sample(foodlist,k)
         centers=[(i,1) for i in centers_]
-     
+
         while(1):
             new_clusters=[[i[0]] for i in centers]
             new_centers=[]
-            
+
             for i in foodlist:
                 distance=distanceCalculator.manhattanDistance(i,centers[0][0])
                 index=0
@@ -636,19 +582,19 @@ def kmeans(myFood, parameter=6):
                         distance=dis
                         index=j
                 new_clusters[index].append(i)
-            
+
             for i in range(len(new_clusters)):
                 x_leng=0
                 y_leng=0
                 for j in range(len(new_clusters[i])):
                     x_leng+=new_clusters[i][j][0]
                     y_leng+=new_clusters[i][j][1]
-                    
-                
+
+
                 new_center=(x_leng/len(new_clusters[i]),y_leng/len(new_clusters[i]))
                 dis_close = 99999
                 close_food=new_clusters[i][0]
-                for j in range(len(new_clusters[i])): 
+                for j in range(len(new_clusters[i])):
                     dis2=distanceCalculator.manhattanDistance(new_clusters[i][j],new_center)
                     if dis2<dis_close:
                         dis_close=dis2
@@ -656,22 +602,22 @@ def kmeans(myFood, parameter=6):
                 new_centers.append((close_food,len(new_clusters[i])))
             if (new_centers==centers):
                 break;
-            centers=new_centers 
+            centers=new_centers
     return new_centers
 
 
 def getMissingFood(gmagent, gameState, steps=3):
     """
     This function gives the information of missing food within previous n(default=3) steps
-    
-    This function takes gameState as input and return a list [((1,3),1), ((1,4),2), (1,5),3)] 
-    this means the closest food to the food was eaten in the recent one step is at position (1,3), 
+
+    This function takes gameState as input and return a list [((1,3),1), ((1,4),2), (1,5),3)]
+    this means the closest food to the food was eaten in the recent one step is at position (1,3),
     and the closest food to the food that is eaten in the previous 2 step is at (1,4),
     and the closest food to the food that is eaten in the previous 3 step is at (1,5)
-    that is to say the opponents pacman may be move from (1,2)->(1,3)->(1,4) accordingly. 
-    
+    that is to say the opponents pacman may be move from (1,2)->(1,3)->(1,4) accordingly.
+
     """
-    
+
     itera=min((len(gmagent.observationHistory)-1), steps)
     ret_list=[]
     for x in range(1,itera+1):
@@ -693,5 +639,4 @@ def getMissingFood(gmagent, gameState, steps=3):
               dist=cur_dist
               food_pos=food
         ret_list.append((food_pos,x))
-    return ret_list 
-      
+    return ret_list
