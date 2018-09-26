@@ -208,6 +208,18 @@ class TestDefensiveReflexAgent(TestReflexCaptureAgent):
     myState = successor.getAgentState(self.index)
     myPos = myState.getPosition()
 
+
+    missingfoodinf=getMissingFood(self, gameState)
+    print(missingfoodinf)
+    dist_miss=0
+    features['MissingFood']=0
+    if len(missingfoodinf)>0:
+      #Weight should be modified
+      features['MissingFood']=5
+      #Try to use distance to measure what action should be taken
+      for pos,i in missingfoodinf:
+        dist_miss=self.getMazeDistance(pos,myPos)
+    print(5*dist_miss)
     # Computes whether we're on defense (1) or offense (0)
     features['onDefense'] = 1
     if myState.isPacman: features['onDefense'] = 0
