@@ -144,6 +144,7 @@ class OffensiveReflexAgent(ReflexCaptureAgent):
     if len(foodList) > 0: # This should always be True,  but better safe than sorry
       myPos = successor.getAgentState(self.index).getPosition()
       minDistance = min([self.getMazeDistance(myPos, food) for food in foodList])
+      # print(action, myPos, minDistance, len(foodList))
       features['distanceToFood'] = minDistance
     return features
 
