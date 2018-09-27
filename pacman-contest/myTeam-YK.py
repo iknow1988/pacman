@@ -39,7 +39,7 @@ from util import nearestPoint
 #################
 
 def createTeam(firstIndex, secondIndex, isRed,
-               first = 'OffensiveReflexAgent', second = 'DefensiveReflexAgent'):
+               first = 'OffensiveReflexAgent', second = 'TestDefensiveReflexAgent'):
   """
   This function should return a list of two agents that will form the
   team, initialized using firstIndex and secondIndex as their agent
@@ -223,7 +223,7 @@ class OffensiveReflexAgent(TestReflexCaptureAgent):
 
 
 ##================DEFENSIVE AGENT===================##
-class DefensiveReflexAgent(TestReflexCaptureAgent):
+class TestDefensiveReflexAgent(TestReflexCaptureAgent):
    
   """
   A reflex agent that keeps its side Pacman-free. Again,
