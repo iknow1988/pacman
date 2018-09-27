@@ -280,7 +280,7 @@ class OffensiveMCT(MCTBasedAgent):
         successor = self.getSuccessor(gameState, action)
         # Compute score from successor state
         features['successorScore'] = self.getScore(gameState)
-        print "succ score:", features['successorScore']
+        
         if self.food_carrying >= self.MAX_FOOD_CARRYING or len(self.getFood(gameState).asList()) <= 2:
             features['successorScore'] = self.getScore(gameState)
         else:
@@ -433,7 +433,7 @@ def writeToFile(self, gameState):
     score = self.getScore(gameState)
     capsules = self.getCapsules(gameState)
     capsulesOpponent = self.getCapsulesYouAreDefending(gameState)
-    print "Food:", len(food), "Defending Food :",len(opponentFood),"Score :",score
+    #print "Food:", len(food), "Defending Food :",len(opponentFood),"Score :",score
 
 
 # experimantal test with UCT
@@ -718,5 +718,5 @@ def getMissingFood(gmagent, gameState, steps=3):
                 dist=cur_dist
                 food_pos=food
           ret_list.append((food_pos,x))
-          
+
     return ret_list
