@@ -312,7 +312,7 @@ class TestDefensiveReflexAgent(TestReflexCaptureAgent):
 
   def getWeights(self, gameState, action):
     ##Priority Different
-    return {'invaderDistance': -1000, 'numInvaders': -1000, 'MissingFood':-100,'targetPosition':-100,
+    return {'invaderDistance': -1000, 'numInvaders': -1000, 'MissingFood':-1000,'targetPosition':-100,
             'onDefense': 10, 'stop': -10, 'reverse': -2}
 
 
