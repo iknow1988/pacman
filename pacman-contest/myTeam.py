@@ -56,54 +56,9 @@ def createTeam(firstIndex, secondIndex, isRed,
 # Agents #
 ##########
 
-
-class DummyAgent(CaptureAgent):
-    """
-    A Dummy agent to serve as an example of the necessary agent structure.
-    You should look at baselineTeam.py for more details about how to
-    create an agent as this is the bare minimum.
-    """
-
-    def registerInitialState(self, gameState):
-        """
-        This method handles the initial setup of the
-        agent to populate useful fields (such as what team
-        we're on).
-
-        A distanceCalculator instance caches the maze distances
-        between each pair of positions, so your agents can use:
-        self.distancer.getDistance(p1, p2)
-
-        IMPORTANT: This method may run for at most 15 seconds.
-        """
-
-        '''
-    Make sure you do not delete the following line. If you would like to
-    use Manhattan distances instead of maze distances in order to save
-    on initialization time, please take a look at
-    CaptureAgent.registerInitialState in captureAgents.py.
-    '''
-        CaptureAgent.registerInitialState(self, gameState)
-
-        '''
-    Your initialization code goes here, if you need any.
-    '''
-        # we need to define initial state
-
-    def chooseAction(self, gameState):
-        """
-        Picks among actions randomly.
-        """
-        actions = gameState.getLegalActions(self.index)
-
-        '''
-    You should change this in your own agent.
-    '''
-
-        return random.choice(actions)
-
-
 # experimental test with baseline
+
+
 class TestReflexCaptureAgent(CaptureAgent):
     """
     A base class for reflex agents that chooses score-maximizing actions
@@ -113,6 +68,7 @@ class TestReflexCaptureAgent(CaptureAgent):
         self.start = gameState.getAgentPosition(self.index)
         CaptureAgent.registerInitialState(self, gameState)
 
+    
     def chooseAction(self, gameState):
         """
         Picks among the actions with the highest Q(s,a).
@@ -204,6 +160,9 @@ class TestOffensiveReflexAgent(TestReflexCaptureAgent):
     def getWeights(self, gameState, action):
         return {'successorScore': 100, 'distanceToFood': -1}
 
+    def getRemainingScareTime(self,gameState, agentIndex):
+        return gameState.getAgentState(agentIndex).scaredTimer
+
 
 class TestDefensiveReflexAgent(TestReflexCaptureAgent):
     """
@@ -234,6 +193,33 @@ class TestDefensiveReflexAgent(TestReflexCaptureAgent):
         if len(invaders) > 0:
             dists = [self.getMazeDistance(
                 myPos, a.getPosition()) for a in invaders]
+            features['invaderDistance'] = min(dists)
+
+        missingfoodinf = getMissingFood(self, gameState)
+        # print(missingfoodinf)
+        dist_miss = 0
+        features['MissingFood'] = 0
+        if len(missingfoodinf) > 0:
+          # Weight should be modified
+          features['MissingFood'] = 5
+          # Try to use distance to measure what action should be taken
+          for pos, i in missingfoodinf:
+            dist_miss = self.getMazeDistance(pos, myPos)
+        # print(5*dist_miss)
+        # Computes whether we're on defense (1) or offense (0)
+        features['onDefense'] = 1
+        if myState.isPacman: features['onDefense'] = 0
+
+        # Computes distance to invaders we can see
+        enemies = [successor.getAgentState(i)
+                                           for i in self.getOpponents(successor)]
+        invaders = [a for a in enemies if a.isPacman and a.getPosition()
+                                                                       != None]
+        features['numInvaders'] = len(invaders)
+        if len(invaders) > 0:
+            dists = [self.getMazeDistance(
+                myPos, a.getPosition()) for a in invaders]
+            # print dists
             features['invaderDistance'] = min(dists)
 
         if action == Directions.STOP:
@@ -268,9 +254,9 @@ class MCTBasedAgent(CaptureAgent):
         """
         features = self.getFeatures(gameState, action)
         weights = self.getWeights(gameState, action)
-        #print "Features",features
-        #print "Weights",weights
-        #print "Eval",features * weights
+        # print "Features",features
+        # print "Weights",weights
+        # print "Eval",features * weights
         return features * weights
 
     def getFeatures(self, gameState, action):
@@ -305,9 +291,11 @@ class OffensiveMCT(MCTBasedAgent):
         # compute distance to the nearest cluster of food : Not working properly, Pacman is getting stucked in some positions
         if len(foodList) > 0 and self.food_carrying <self.MAX_FOOD_CARRYING:
           successor_food_clusters=kmeans(self.getFood(successor),3)
-          best_food_cluster=max(successor_food_clusters,key=lambda item:item[1])[0]
+          best_food_cluster=max(successor_food_clusters,
+                                key=lambda item:item[1])[0]
           myPos = successor.getAgentState(self.index).getPosition()
-          distance_to_food_cluster = self.getMazeDistance(myPos, best_food_cluster)
+          distance_to_food_cluster = self.getMazeDistance(
+              myPos, best_food_cluster)
           print "Distance:",myPos,"-",best_food_cluster,"=>",distance_to_food_cluster
           features['distanceToFoodCluster'] = distance_to_food_cluster
         """
@@ -433,11 +421,19 @@ class OffensiveMCT(MCTBasedAgent):
                     self.MAX_EXPLORATION, new_state)
             q_a_s[a] = sim_value
 
-        #print "ACTIONS:",self.index,q_a_s
+        # print "ACTIONS:",self.index,q_a_s
         next_play = max(q_a_s, key=q_a_s.get)
 
-        #print 'eval time for offensive agent %d: %.4f, Action:%s' % (self.index, time.time() - start,next_play)
+        # print 'eval time for offensive agent %d: %.4f, Action:%s' % (self.index, time.time() - start,next_play)
         return next_play
+
+def writeToFile(self, gameState):
+    food = self.getFood(gameState).asList()
+    opponentFood = self.getFoodYouAreDefending(gameState).asList()
+    score = self.getScore(gameState)
+    capsules = self.getCapsules(gameState)
+    capsulesOpponent = self.getCapsulesYouAreDefending(gameState)
+    print "Food:", len(food), "Defending Food :",len(opponentFood),"Score :",score
 
 
 # experimantal test with UCT
@@ -459,9 +455,9 @@ class UCTBasedAgent(CaptureAgent):
         """
         features = self.getFeatures(gameState, action)
         weights = self.getWeights(gameState, action)
-        #print "Features",features
-        #print "Weights",weights
-        #print "Eval",features * weights
+        # print "Features",features
+        # print "Weights",weights
+        # print "Eval",features * weights
         return features * weights
 
     def getFeatures(self, gameState, action):
@@ -622,23 +618,23 @@ class OffensiveUCT(UCTBasedAgent):
                     self.MAX_EXPLORATION, new_state)
             q_a_s[a] = sim_value
 
-        #print "ACTIONS:",self.index,q_a_s
+        # print "ACTIONS:",self.index,q_a_s
         next_play = max(q_a_s, key=q_a_s.get)
 
-        #print 'eval time for offensive agent %d: %.4f, Action:%s' % (self.index, time.time() - start,next_play)
+        # print 'eval time for offensive agent %d: %.4f, Action:%s' % (self.index, time.time() - start,next_play)
         return next_play
 
 
 def kmeans(myFood, parameter=6):
-    """    
+    """
     myFood is grid variable defined in capture
-       parameter is used to determine how many foods needed for a center. 
+       parameter is used to determine how many foods needed for a center.
        amount of food / parameter = round down to k
        e.g  20 foods with parameter=6 gives 3 centers(round down to 3)
             20 foods with parameter=5 gives 4 centers
     """
 
-    #print myFood
+    # print myFood
     width = myFood.width
     height = myFood.height
     foodlist = [(i, j) for i in range(width)
@@ -687,3 +683,40 @@ def kmeans(myFood, parameter=6):
                 break
             centers = new_centers
     return new_centers
+
+
+def getMissingFood(gmagent, gameState, steps=3):
+    """
+    This function gives the information of missing food within previous n(default=3) steps
+
+    This function takes gameState as input and return a list [((1,3),1), ((1,4),2), (1,5),3)]
+    this means the closest food to the food was eaten in the recent one step is at position (1,3),
+    and the closest food to the food that is eaten in the previous 2 step is at (1,4),
+    and the closest food to the food that is eaten in the previous 3 step is at (1,5)
+    that is to say the opponents pacman may be move from (1,2)->(1,3)->(1,4) accordingly.
+
+    """
+
+    itera=min((len(gmagent.observationHistory)-1), steps)
+    ret_list=[]
+    for x in range(1,itera+1):
+        index=-x
+        preind=index-1
+        curfoodlist=gmagent.getFoodYouAreDefending(gmagent.observationHistory[index]).asList()
+        prefoodlist=gmagent.getFoodYouAreDefending(gmagent.observationHistory[preind]).asList()
+        # print(curfoodlist)
+        # print(prefoodlist)
+        missingfoods=[i for i in prefoodlist if i not in curfoodlist]
+        if len(missingfoods)!=0:
+          missingfoods=missingfoods[0]
+          dist=9999999
+          food_pos=0
+          for food in prefoodlist:
+            if food !=missingfoods:
+              cur_dist=gmagent.getMazeDistance(missingfoods,food)
+              if cur_dist<dist:
+                dist=cur_dist
+                food_pos=food
+          ret_list.append((food_pos,x))
+          
+    return ret_list
