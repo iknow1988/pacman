@@ -299,13 +299,13 @@ class TestDefensiveReflexAgent(TestReflexCaptureAgent):
         for pos,k in kmeans_positions:
             if k > 3:
                 key_pos.append(pos)
-        print(key_pos)    
+        #print(key_pos)    
     
         self.target_position=key_pos[int(random.uniform(0,len(key_pos)))]
     
     if self.target_position!=None:
         
-        print("inside loop", self.target_position)
+        #print("inside loop", self.target_position)
         features['targetPosition']=self.getMazeDistance(self.target_position,myPos)
 
     return features
