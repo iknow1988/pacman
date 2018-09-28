@@ -33,13 +33,14 @@ import game
 import distanceCalculator
 import random, time, util, sys
 from util import nearestPoint
+import capture
 
 #################
 # Team creation #
 #################
 
 def createTeam(firstIndex, secondIndex, isRed,
-               first = 'OffensiveReflexAgent', second = 'TestDefensiveReflexAgent'):
+               first = 'OffensiveReflexAgent', second = 'RICKDefensiveReflexAgent'):
   """
   This function should return a list of two agents that will form the
   team, initialized using firstIndex and secondIndex as their agent
@@ -128,7 +129,6 @@ class TestReflexCaptureAgent(CaptureAgent):
     # You can profile your evaluation time by uncommenting these lines
     # start = time.time()
     values = [self.evaluate(gameState, a) for a in actions]
-    # print 'eval time for agent %d: %.4f' % (self.index, time.time() - start)
 
     maxValue = max(values)
     bestActions = [a for a, v in zip(actions, values) if v == maxValue]
@@ -184,14 +184,6 @@ class TestReflexCaptureAgent(CaptureAgent):
     """
     return {'successorScore': 1.0}
 
-
-
-
-
-
-
-
-
 ##================BASELINE OFFENSIVE AGENT===================##
 class OffensiveReflexAgent(TestReflexCaptureAgent):
   """
@@ -218,12 +210,8 @@ class OffensiveReflexAgent(TestReflexCaptureAgent):
 
 
 
-
-
-
-
 ##================DEFENSIVE AGENT===================##
-class TestDefensiveReflexAgent(TestReflexCaptureAgent):
+class RICKDefensiveReflexAgent(TestReflexCaptureAgent):
    
   """
   A reflex agent that keeps its side Pacman-free. Again,
@@ -247,21 +235,8 @@ class TestDefensiveReflexAgent(TestReflexCaptureAgent):
     ##Update self.scare
     if self.scare==0:
         self.scare=CapsuleMonitor(self, gameState,self.scare)
-        #print(self.scare)
     elif self.scare==1:
         self.scare=CapsuleMonitor(self, gameState,self.scare)
-        #print(self.scare)
-    #print(myState)
-    #print(type(myState))
-    """Sactions=successor.getLegalActions(self.index)
-    #print(Sactions)
-    for act in Sactions:
-        suc=successor.generateSuccessor(self.index, act)
-        sucPos = suc.getAgentState(self.index)
-        #print(self.getMazeDistance(sucPos.getPosition(),(1,1)))
-    print("==================")"""
-    
-    half_position=(gameState.data.layout.width/2,gameState.data.layout.height/2)
     missingfoodinf=getMissingFood(self, gameState)
     
     dist_miss=0
@@ -288,38 +263,24 @@ class TestDefensiveReflexAgent(TestReflexCaptureAgent):
       self.target_position=None
       dists = [self.getMazeDistance(myPos, a.getPosition()) for a in invaders]
       features['invaderDistance'] = min(dists)
-
     if action == Directions.STOP: features['stop'] = 1
     rev = Directions.REVERSE[gameState.getAgentState(self.index).configuration.direction]
     if action == rev: features['reverse'] = 1
 
-    if self.target_position==None and len(alerting)==0:
-        kmeans_positions=kmeans(self.getFoodYouAreDefending(successor))
-        key_pos=[half_position]
-        for pos,k in kmeans_positions:
-            if k > 3:
-                key_pos.append(pos)
-        #print(key_pos)    
-    
+    if self.target_position==None and len(alerting)==0 and len(invaders)==0:
+        #kmeans_positions=kmeans(self.getFoodYouAreDefending(successor))
+        key_pos=keyPositions(self, gameState)
         self.target_position=key_pos[int(random.uniform(0,len(key_pos)))]
-    
-    if self.target_position!=None:
         
-        #print("inside loop", self.target_position)
+    if self.target_position!=None:        
         features['targetPosition']=self.getMazeDistance(self.target_position,myPos)
-
+    
     return features
 
   def getWeights(self, gameState, action):
     ##Priority Different
-    return {'invaderDistance': -1000, 'numInvaders': -1000, 'MissingFood':-1000,'targetPosition':-100,
-            'onDefense': 10, 'stop': -10, 'reverse': -2}
-
-
-
-
-
-
+    return {'invaderDistance': -10000, 'numInvaders': -10000, 'MissingFood':-10000,'targetPosition':-100,
+            'onDefense': 10000, 'stop': -10, 'reverse': -2}
 
 def kmeans(myFood, parameter=6):
     """    
@@ -329,7 +290,6 @@ def kmeans(myFood, parameter=6):
        e.g  20 foods with parameter=6 gives 3 centers(round down to 3)
             20 foods with parameter=5 gives 4 centers
     """
-
     width=myFood.width
     height=myFood.height    
     foodlist=[(i,j) for i in range(width) for j in range(height) if myFood[i][j]==True]   
@@ -359,23 +319,22 @@ def kmeans(myFood, parameter=6):
                 for j in range(len(new_clusters[i])):
                     x_leng+=new_clusters[i][j][0]
                     y_leng+=new_clusters[i][j][1]
-                    
-                
                 new_center=(x_leng/len(new_clusters[i]),y_leng/len(new_clusters[i]))
                 dis_close = 99999
                 close_food=new_clusters[i][0]
                 for j in range(len(new_clusters[i])): 
                     dis2=distanceCalculator.manhattanDistance(new_clusters[i][j],new_center)
-                    if dis2<dis_close:
+                    if dis2<=dis_close:
                         dis_close=dis2
                         close_food=new_clusters[i][j]
+                    
                 new_centers.append((close_food,len(new_clusters[i])))
             if (new_centers==centers):
                 break;
             centers=new_centers 
     return new_centers
 
-def getMissingFood(gmagent, gameState, steps=3):
+def getMissingFood(gmagent, gameState, steps=5):
     """
     This function gives the information of missing food within previous n(default=3) steps
     
@@ -410,14 +369,12 @@ def getMissingFood(gmagent, gameState, steps=3):
   
 
 def CapsuleMonitor(gmagent, gameState, scare, last=40):
-    #print("In CapsuleMonitor")
     if scare==0:
         index=-1
         preind=index-1
         if len(gmagent.observationHistory)>2:
             curCaplist=gmagent.getCapsulesYouAreDefending(gmagent.observationHistory[index])
             preCaplist=gmagent.getCapsulesYouAreDefending(gmagent.observationHistory[preind])
-            #print(curCaplist,preCaplist)
             if(len(preCaplist)-len(curCaplist)==1):
                 return 1
     if scare==1 and len(gmagent.observationHistory)>2:
@@ -425,9 +382,22 @@ def CapsuleMonitor(gmagent, gameState, scare, last=40):
             return 0
     return scare
 
-
-
-
+def keyPositions(gmagent, gameState):
+    #curfood=gmagent.getFoodYouAreDefending(gmagent.observationHistory[0]).asList()
+    half_position=(int(gameState.data.layout.width/2-gmagent.red),int(gameState.data.layout.height/2))
+    while(gameState.hasWall(half_position[0],half_position[1])):
+        half_position=(half_position[0],half_position[1]-1)    
+    #closestPos = min(curfood, key = lambda x: gmagent.getMazeDistance(half_position, x))
+    
+    FirstquaterPosition=(int((gameState.data.layout.width/2)-6*(gmagent.red-0.5)),int(gameState.data.layout.height/4))
+    
+    while(gameState.hasWall(FirstquaterPosition[0],FirstquaterPosition[1])):
+        FirstquaterPosition=(FirstquaterPosition[0],FirstquaterPosition[1]-1)
+        
+    ThirdquaterPosition=(int((gameState.data.layout.width/2)-6*(gmagent.red-0.5)),int(gameState.data.layout.height*3/4))
+    while(gameState.hasWall(ThirdquaterPosition[0],ThirdquaterPosition[1])):
+        ThirdquaterPosition=(ThirdquaterPosition[0],ThirdquaterPosition[1]-1)
+    return [half_position, FirstquaterPosition, ThirdquaterPosition]
 
 
 
