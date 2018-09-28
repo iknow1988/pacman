@@ -334,7 +334,7 @@ def kmeans(myFood, parameter=6):
             centers=new_centers 
     return new_centers
 
-def getMissingFood(gmagent, gameState, steps=5):
+def getMissingFood(gmagent, gameState, steps=6):
     """
     This function gives the information of missing food within previous n(default=3) steps
     
