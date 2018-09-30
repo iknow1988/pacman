@@ -903,75 +903,74 @@ class OffensiveReflexAgent(ReflexCaptureAgent):
 ##================DEFENSIVE AGENT===================##
 class GTDefensiveReflexAgent(TestReflexCaptureAgent):
    
-  """
-  A reflex agent that keeps its side Pacman-free. Again,
-  this is to give you an idea of what a defensive agent
-  could be like.  It is not the best or only way to make
-  such an agent.
-  """
-  scare=0
-  target_position=None
-  visited=[]
-  fading=7
-  
-  def getFeatures(self, gameState, action):
-    features = util.Counter()
-    successor = self.getSuccessor(gameState, action)
-
-    myState = successor.getAgentState(self.index)
-    myPos = myState.getPosition()
-    if self.target_position==myPos:
-        self.target_position=None
-    ##Update self.scare
-    if self.scare==0:
-        self.scare=CapsuleMonitor(self, gameState,self.scare)
-    elif self.scare==1:
-        self.scare=CapsuleMonitor(self, gameState,self.scare)
-    missingfoodinf=getMissingFood(self, gameState)
+    """
+    A reflex agent that keeps its side Pacman-free. Again,
+    this is to give you an idea of what a defensive agent
+    could be like.  It is not the best or only way to make
+    such an agent.
+    """
+    scare=0
+    target_position=None
+    visited=[]  
+    fading=7
     
-    dist_miss=0
-    if len(missingfoodinf)>0:
-      #Weight should be modified
+    def getFeatures(self, gameState, action):
+        features = util.Counter()
+        successor = self.getSuccessor(gameState, action)
+        
+        myState = successor.getAgentState(self.index)
+        myPos = myState.getPosition()
+        if self.target_position==myPos:
+            self.target_position=None
+    ##Update self.scare
+        if self.scare==0:
+            self.scare=CapsuleMonitor(self, gameState,self.scare)
+        elif self.scare==1:
+            self.scare=CapsuleMonitor(self, gameState,self.scare)
+        missingfoodinf=getMissingFood(self, gameState)
+    
+        dist_miss=0
+        if len(missingfoodinf)>0:
+            #Weight should be modified
       
-      #Try to use distance to measure what action should be taken
-      for pos,i in missingfoodinf:
-        dist_miss+=self.getMazeDistance(pos,myPos)
+        #Try to use distance to measure what action should be taken
+            for pos,i in missingfoodinf:
+                dist_miss+=self.getMazeDistance(pos,myPos)
       #print(missingfoodinf, action, dist_miss)
-    features['MissingFood']=dist_miss
+        features['MissingFood']=dist_miss
     
 
     # Computes whether we're on defense (1) or offense (0)
-    features['onDefense'] = 1
-    if myState.isPacman: features['onDefense'] = 0
+        features['onDefense'] = 1
+        if myState.isPacman: features['onDefense'] = 0
 
-    # Computes distance to invaders we can see
-    enemies = [successor.getAgentState(i) for i in self.getOpponents(successor)]
-    alerting=[a for a in enemies if a.isPacman]
-    invaders = [a for a in enemies if a.isPacman and a.getPosition() != None]
-    features['numInvaders'] = len(invaders)
-    if len(invaders) > 0:
-      self.target_position=None
-      dists = [self.getMazeDistance(myPos, a.getPosition()) for a in invaders]
-      features['invaderDistance'] = min(dists)
-    if action == Directions.STOP: features['stop'] = 1
-    rev = Directions.REVERSE[gameState.getAgentState(self.index).configuration.direction]
-    if action == rev: features['reverse'] = 1
-
-    if self.target_position==None and len(alerting)==0 and len(invaders)==0:
-        #kmeans_positions=kmeans(self.getFoodYouAreDefending(successor))
-        key_pos=keyPositions(self, gameState)
-        self.target_position=key_pos[int(random.uniform(0,len(key_pos)))]
-        
-    if self.target_position!=None:        
-        features['targetPosition']=self.getMazeDistance(self.target_position,myPos)
+     # Computes distance to invaders we can see
+        enemies = [successor.getAgentState(i) for i in self.getOpponents(successor)]
+        alerting=[a for a in enemies if a.isPacman]
+        invaders = [a for a in enemies if a.isPacman and a.getPosition() != None]
+        features['numInvaders'] = len(invaders)
+        if len(invaders) > 0:
+          self.target_position=None
+          dists = [self.getMazeDistance(myPos, a.getPosition()) for a in invaders]
+          features['invaderDistance'] = min(dists)
+        if action == Directions.STOP: features['stop'] = 1
+        rev = Directions.REVERSE[gameState.getAgentState(self.index).configuration.direction]
+        if action == rev: features['reverse'] = 1
     
-    return features
+        if self.target_position==None and len(alerting)==0 and len(invaders)==0:
+          #kmeans_positions=kmeans(self.getFoodYouAreDefending(successor))
+            key_pos=keyPositions(self, gameState)
+            self.target_position=key_pos[int(random.uniform(0,len(key_pos)))]
+        
+        if self.target_position!=None:        
+            features['targetPosition']=self.getMazeDistance(self.target_position,myPos)
+    
+        return features
 
-  def getWeights(self, gameState, action):
-    ##Priority Different
-    return {'invaderDistance': -10000, 'numInvaders': -10000, 'MissingFood':-10000,'targetPosition':-100,
-            'onDefense': 10000, 'stop': -10, 'reverse': -2}
-
+    def getWeights(self, gameState, action):
+      ##Priority Different
+      return {'invaderDistance': -10000, 'numInvaders': -10000, 'MissingFood':-10000,'targetPosition':-100,
+              'onDefense': 10000, 'stop': -10, 'reverse': -2}
 
 def kmeans(myFood, parameter=6):
     """    
