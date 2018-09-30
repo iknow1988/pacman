@@ -1081,3 +1081,23 @@ def CapsuleMonitor(gmagent, gameState, scare, last=40):
         if gameState.getAgentPosition(gmagent.index) == gmagent.observationHistory[0].getAgentPosition(gmagent.index):
             return 0
     return scare
+
+
+def keyPositions(gmagent, gameState):
+    #curfood=gmagent.getFoodYouAreDefending(gmagent.observationHistory[0]).asList()
+    half_position=(int(gameState.data.layout.width/2-gmagent.red),int(gameState.data.layout.height/2))
+    while(gameState.hasWall(half_position[0],half_position[1])):
+        half_position=(half_position[0],half_position[1]-1)    
+    #closestPos = min(curfood, key = lambda x: gmagent.getMazeDistance(half_position, x))
+    
+    FirstquaterPosition=(int((gameState.data.layout.width/2)-6*(gmagent.red-0.5)),int(gameState.data.layout.height/4))
+    
+    while(gameState.hasWall(FirstquaterPosition[0],FirstquaterPosition[1])):
+        FirstquaterPosition=(FirstquaterPosition[0],FirstquaterPosition[1]-1)
+        
+    ThirdquaterPosition=(int((gameState.data.layout.width/2)-6*(gmagent.red-0.5)),int(gameState.data.layout.height*3/4))
+    while(gameState.hasWall(ThirdquaterPosition[0],ThirdquaterPosition[1])):
+        ThirdquaterPosition=(ThirdquaterPosition[0],ThirdquaterPosition[1]-1)
+    return [half_position, FirstquaterPosition, ThirdquaterPosition]
+
+
