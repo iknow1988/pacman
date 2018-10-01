@@ -35,7 +35,7 @@ random.seed(42)
 
 
 def createTeam(firstIndex, secondIndex, isRed,
-               first='OffensiveUCT', second='DefensiveReflexAgent'):
+               first='OffensiveUCT', second='GTDefensiveReflexAgent'):
     """
     This function should return a list of two agents that will form the
     team, initialized using firstIndex and secondIndex as their agent
@@ -901,169 +901,129 @@ class OffensiveReflexAgent(ReflexCaptureAgent):
 
 
 ##================DEFENSIVE AGENT===================##
-class DefensiveReflexAgent(ReflexCaptureAgent):
-
+class GTDefensiveReflexAgent(TestReflexCaptureAgent):
+   
     """
     A reflex agent that keeps its side Pacman-free. Again,
     this is to give you an idea of what a defensive agent
     could be like.  It is not the best or only way to make
     such an agent.
     """
-    scare = 0
-    target_position = None
-    visited = []
-    fading = 7
-
+    scare=0
+    target_position=None
+    visited=[]  
+    fading=7
+    
     def getFeatures(self, gameState, action):
         features = util.Counter()
         successor = self.getSuccessor(gameState, action)
-
+        
         myState = successor.getAgentState(self.index)
         myPos = myState.getPosition()
-        if self.target_position == myPos:
-            self.target_position = None
-        # Update self.scare
-        if self.scare == 0:
-            self.scare = CapsuleMonitor(self, gameState, self.scare)
-            # print(self.scare)
-        elif self.scare == 1:
-            self.scare = CapsuleMonitor(self, gameState, self.scare)
-            # print(self.scare)
-        # print(myState)
-        # print(type(myState))
-        """
-        Sactions=successor.getLegalActions(self.index)
-        #print(Sactions)
-        for act in Sactions:
-            suc=successor.generateSuccessor(self.index, act)
-            sucPos = suc.getAgentState(self.index)
-            #print(self.getMazeDistance(sucPos.getPosition(),(1,1)))
-        print("==================")
-        """
+        if self.target_position==myPos:
+            self.target_position=None
+    ##Update self.scare
+        if self.scare==0:
+            self.scare=CapsuleMonitor(self, gameState,self.scare)
+        elif self.scare==1:
+            self.scare=CapsuleMonitor(self, gameState,self.scare)
+        missingfoodinf=getMissingFood(self, gameState)
+    
+        dist_miss=0
+        if len(missingfoodinf)>0:
+            #Weight should be modified
+      
+        #Try to use distance to measure what action should be taken
+            for pos,i in missingfoodinf:
+                dist_miss+=self.getMazeDistance(pos,myPos)
+      #print(missingfoodinf, action, dist_miss)
+        features['MissingFood']=dist_miss
+    
 
-        half_position = (gameState.data.layout.width/2,
-                         gameState.data.layout.height/2)
-        missingfoodinf = getMissingFood(self, gameState)
-
-        dist_miss = 0
-        if len(missingfoodinf) > 0:
-            # Weight should be modified
-
-            # Try to use distance to measure what action should be taken
-            for pos, i in missingfoodinf:
-                dist_miss += self.getMazeDistance(pos, myPos)
-            #print(missingfoodinf, action, dist_miss)
-        features['MissingFood'] = dist_miss
-
-        # Computes whether we're on defense (1) or offense (0)
+    # Computes whether we're on defense (1) or offense (0)
         features['onDefense'] = 1
-        if myState.isPacman:
-            features['onDefense'] = 0
+        if myState.isPacman: features['onDefense'] = 0
 
-        # Computes distance to invaders we can see
-        enemies = [successor.getAgentState(i)
-                   for i in self.getOpponents(successor)]
-        alerting = [a for a in enemies if a.isPacman]
-        invaders = [a for a in enemies if a.isPacman and a.getPosition()
-                    != None]
+     # Computes distance to invaders we can see
+        enemies = [successor.getAgentState(i) for i in self.getOpponents(successor)]
+        alerting=[a for a in enemies if a.isPacman]
+        invaders = [a for a in enemies if a.isPacman and a.getPosition() != None]
         features['numInvaders'] = len(invaders)
         if len(invaders) > 0:
-            self.target_position = None
-            dists = [self.getMazeDistance(
-                myPos, a.getPosition()) for a in invaders]
-            features['invaderDistance'] = min(dists)
-
-        if action == Directions.STOP:
-            features['stop'] = 1
-        rev = Directions.REVERSE[gameState.getAgentState(
-            self.index).configuration.direction]
-        if action == rev:
-            features['reverse'] = 1
-
-        if self.target_position == None and len(alerting) == 0:
-            kmeans_positions = kmeans(self.getFoodYouAreDefending(successor))
-            key_pos = [half_position]
-            for pos, k in kmeans_positions:
-                if k > 3:
-                    key_pos.append(pos)
-            # print(key_pos)
-
-            self.target_position = key_pos[int(
-                random.uniform(0, len(key_pos)))]
-
-        if self.target_position != None:
-
-            #print("inside loop", self.target_position)
-            features['targetPosition'] = self.getMazeDistance(
-                self.target_position, myPos)
-
+          self.target_position=None
+          dists = [self.getMazeDistance(myPos, a.getPosition()) for a in invaders]
+          features['invaderDistance'] = min(dists)
+        if action == Directions.STOP: features['stop'] = 1
+        rev = Directions.REVERSE[gameState.getAgentState(self.index).configuration.direction]
+        if action == rev: features['reverse'] = 1
+    
+        if self.target_position==None and len(alerting)==0 and len(invaders)==0:
+          #kmeans_positions=kmeans(self.getFoodYouAreDefending(successor))
+            key_pos=keyPositions(self, gameState)
+            self.target_position=key_pos[int(random.uniform(0,len(key_pos)))]
+        
+        if self.target_position!=None:        
+            features['targetPosition']=self.getMazeDistance(self.target_position,myPos)
+    
         return features
 
     def getWeights(self, gameState, action):
-        # Priority Different
-        return {'invaderDistance': -1000, 'numInvaders': -1000, 'MissingFood': -1000, 'targetPosition': -100,
-                'onDefense': 10, 'stop': -10, 'reverse': -2}
-
+      ##Priority Different
+      return {'invaderDistance': -10000, 'numInvaders': -10000, 'MissingFood':-10000,'targetPosition':-100,
+              'onDefense': 10000, 'stop': -10, 'reverse': -2}
 
 def kmeans(myFood, parameter=6):
-    """
+    """    
     myFood is grid variable defined in capture
-       parameter is used to determine how many foods needed for a center.
+       parameter is used to determine how many foods needed for a center. 
        amount of food / parameter = round down to k
        e.g  20 foods with parameter=6 gives 3 centers(round down to 3)
             20 foods with parameter=5 gives 4 centers
     """
-
-    # print myFood
-    width = myFood.width
-    height = myFood.height
-    foodlist = [(i, j) for i in range(width)
-                for j in range(height) if myFood[i][j] == True]
-    k = max(1, len(foodlist)/parameter)
-
-    if len(foodlist) > 0:
-        centers_ = random.sample(foodlist, k)
-        centers = [(i, 1) for i in centers_]
-
-        while(1):
-            new_clusters = [[i[0]] for i in centers]
-            new_centers = []
-
+    width=myFood.width
+    height=myFood.height    
+    foodlist=[(i,j) for i in range(width) for j in range(height) if myFood[i][j]==True]   
+    k=max(1,len(foodlist)/parameter)
+    
+    if len(foodlist)>0:
+        centers_=random.sample(foodlist,k)    
+        centers=[(i,1) for i in centers_]
+        flag=0
+        while(1 or flag>20):
+            flag+=1
+            new_clusters=[[i[0]] for i in centers]
+            new_centers=[]
+            
             for i in foodlist:
-                distance = distanceCalculator.manhattanDistance(
-                    i, centers[0][0])
-                index = 0
-                for j in range(1, len(centers)):
-                    dis = distanceCalculator.manhattanDistance(
-                        i, centers[j][0])
-                    if dis < distance:
-                        distance = dis
-                        index = j
+                distance=distanceCalculator.manhattanDistance(i,centers[0][0])
+                index=0
+                for j in range(1,len(centers)):
+                    dis=distanceCalculator.manhattanDistance(i,centers[j][0])
+                    if dis<distance:
+                        distance=dis
+                        index=j
                 new_clusters[index].append(i)
-
+            
             for i in range(len(new_clusters)):
-                x_leng = 0
-                y_leng = 0
+                x_leng=0
+                y_leng=0
                 for j in range(len(new_clusters[i])):
-                    x_leng += new_clusters[i][j][0]
-                    y_leng += new_clusters[i][j][1]
-
-                new_center = (
-                    x_leng/len(new_clusters[i]), y_leng/len(new_clusters[i]))
+                    x_leng+=new_clusters[i][j][0]
+                    y_leng+=new_clusters[i][j][1]
+                new_center=(x_leng/len(new_clusters[i]),y_leng/len(new_clusters[i]))
                 dis_close = 99999
-                close_food = new_clusters[i][0]
-                for j in range(len(new_clusters[i])):
-                    dis2 = distanceCalculator.manhattanDistance(
-                        new_clusters[i][j], new_center)
-                    if dis2 < dis_close:
-                        dis_close = dis2
-                        close_food = new_clusters[i][j]
-                new_centers.append((close_food, len(new_clusters[i])))
-            if (new_centers == centers):
-                break
-            centers = new_centers
+                close_food=new_clusters[i][0]
+                for j in range(len(new_clusters[i])): 
+                    dis2=distanceCalculator.manhattanDistance(new_clusters[i][j],new_center)
+                    if dis2<=dis_close:
+                        dis_close=dis2
+                        close_food=new_clusters[i][j]
+                    
+                new_centers.append((close_food,len(new_clusters[i])))
+            if (new_centers==centers):
+                break;
+            centers=new_centers 
     return new_centers
-
 
 def getMissingFood(gmagent, gameState, steps=3):
     """
@@ -1121,3 +1081,23 @@ def CapsuleMonitor(gmagent, gameState, scare, last=40):
         if gameState.getAgentPosition(gmagent.index) == gmagent.observationHistory[0].getAgentPosition(gmagent.index):
             return 0
     return scare
+
+
+def keyPositions(gmagent, gameState):
+    #curfood=gmagent.getFoodYouAreDefending(gmagent.observationHistory[0]).asList()
+    half_position=(int(gameState.data.layout.width/2-gmagent.red),int(gameState.data.layout.height/2))
+    while(gameState.hasWall(half_position[0],half_position[1])):
+        half_position=(half_position[0],half_position[1]-1)    
+    #closestPos = min(curfood, key = lambda x: gmagent.getMazeDistance(half_position, x))
+    
+    FirstquaterPosition=(int((gameState.data.layout.width/2)-6*(gmagent.red-0.5)),int(gameState.data.layout.height/4))
+    
+    while(gameState.hasWall(FirstquaterPosition[0],FirstquaterPosition[1])):
+        FirstquaterPosition=(FirstquaterPosition[0],FirstquaterPosition[1]-1)
+        
+    ThirdquaterPosition=(int((gameState.data.layout.width/2)-6*(gmagent.red-0.5)),int(gameState.data.layout.height*3/4))
+    while(gameState.hasWall(ThirdquaterPosition[0],ThirdquaterPosition[1])):
+        ThirdquaterPosition=(ThirdquaterPosition[0],ThirdquaterPosition[1]-1)
+    return [half_position, FirstquaterPosition, ThirdquaterPosition]
+
+
