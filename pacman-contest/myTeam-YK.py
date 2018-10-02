@@ -358,7 +358,7 @@ def getMissingFood(gmagent, gameState, steps=6):
       if len(missingfoods)!=0:
         missingfoods=missingfoods[0]
         dist=9999999
-        food_pos=0
+        food_pos=prefoodlist[0]
         for food in prefoodlist:
           if food !=missingfoods:
             cur_dist=gmagent.getMazeDistance(missingfoods,food)
