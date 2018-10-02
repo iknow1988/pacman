@@ -279,7 +279,7 @@ class GTDefensiveReflexAgent(TestReflexCaptureAgent):
 
     def getWeights(self, gameState, action):
       ##Priority Different
-      return {'invaderDistance': -10000, 'numInvaders': -10000, 'MissingFood':-10000,'targetPosition':-100,
+      return {'invaderDistance': -100000, 'numInvaders': -100000, 'MissingFood':-1000,'targetPosition':-100,
               'onDefense': 10000, 'stop': -10, 'reverse': -2}
 
 def kmeans(myFood, parameter=6):
