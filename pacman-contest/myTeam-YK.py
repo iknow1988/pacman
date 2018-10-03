@@ -398,7 +398,14 @@ def keyPositions(gmagent, gameState):
     ThirdquaterPosition=(int((gameState.data.layout.width/2)-6*(gmagent.red-0.5)),int(gameState.data.layout.height*3/4))
     while(gameState.hasWall(ThirdquaterPosition[0],ThirdquaterPosition[1])):
         ThirdquaterPosition=(ThirdquaterPosition[0],ThirdquaterPosition[1]-1)
-    return [half_position, FirstquaterPosition, ThirdquaterPosition]
+        
+    validPositions=[pos for pos in [half_position, FirstquaterPosition, ThirdquaterPosition] if pos[0]>=0 and pos[1]>=0]
+    start_position=gmagent.observationHistory[0].getAgentPosition(gmagent.index)
+    ##we dont want our key positions to be too close to the starting position
+    validPositions=[pos for pos in validPositions if gmagent.getMazeDistance(pos,start_position)>=5]
+    
+    return validPositions
+
 
 
 
