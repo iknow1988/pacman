@@ -100,13 +100,13 @@ class ApproximateQAgent(CaptureAgent):
 		self.opponentScore = 0
 
 	def computeActionFromQValues(self, gameState):
-		actions = gameState.getLegalActions(self.index)
+		return 'Stop'
+		# actions = gameState.getLegalActions(self.index)
 		# values = [self.getQValue(gameState, a) for a in actions]
 		#
 		# maxValue = max(values)
 		# bestActions = [a for a, v in zip(actions, values) if v == maxValue]
-		return 'Stop'
-		# return random.choice(actions)
+		# return random.choice(bestActions)
 
 	def doAction(self, state, action):
 		self.lastState = state
@@ -162,9 +162,9 @@ class OffensiveQAgent(ApproximateQAgent):
 		self.carryLimit = 10
 		self.PowerTimer = 3
 		self.weights = util.Counter()
-		# if os.path.exists('weights'):
-		# 	with open('weights', "rb") as f:
-		# 		self.weights = pickle.load(f)
+		if os.path.exists('weights'):
+			with open('weights', "rb") as f:
+				self.weights = pickle.load(f)
 			# print "Loaded weights", self.weights
 
 
@@ -251,8 +251,8 @@ class OffensiveQAgent(ApproximateQAgent):
 		return features
 
 	def final(self, state):
-		# with open('weights', 'wb') as f:
-		# 	pickle.dump(self.weights, f)
+		with open('weights', 'wb') as f:
+			pickle.dump(self.weights, f)
 		# print self.weights
 		CaptureAgent.final(self, state)
 
@@ -285,7 +285,7 @@ class DefensiveQAgent(ApproximateQAgent):
 		missingFoods = self.getMissingFoods(state)
 
 		features["bias"] = 1.0
-		features["isPacman"] = 0.0
+		features["isPacman"] = -1.0
 		if newState.isPacman:
 			features["isPacman"] = 1.0
 
