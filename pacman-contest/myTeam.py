@@ -1214,11 +1214,11 @@ class DefensiveQAgent(ApproximateQAgent):
         self.weights = util.Counter()
 
         if os.path.exists(self.filename):
-            with open(self.filename, "rb") as f:
+            with open(self.filename, "r") as f:
                 self.weights = pickle.load(f)
 
     def final(self, state):
-        with open(self.filename, 'wb') as f:
+        with open(self.filename, 'w') as f:
             pickle.dump(self.weights, f)
         # print "Updated", self.weights
         ApproximateQAgent.final(self, state)
