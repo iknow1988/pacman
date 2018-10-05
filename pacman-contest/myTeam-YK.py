@@ -30,6 +30,7 @@ from captureAgents import CaptureAgent
 import random, time, util
 from game import Directions
 import game
+from game import Actions
 import distanceCalculator
 import random, time, util, sys
 from util import nearestPoint
@@ -40,7 +41,7 @@ import capture
 #################
 
 def createTeam(firstIndex, secondIndex, isRed,
-               first = 'OffensiveReflexAgent', second = 'GTDefensiveReflexAgent'):
+               first = 'GTDefensiveReflexAgent', second = 'GTDefensiveReflexAgent'):
   """
   This function should return a list of two agents that will form the
   team, initialized using firstIndex and secondIndex as their agent
@@ -222,9 +223,15 @@ class GTDefensiveReflexAgent(TestReflexCaptureAgent):
     scare=0
     target_position=None
     visited=[]  
-    fading=7
-    
+  
     def getFeatures(self, gameState, action):
+        
+        
+        half_position=(int(gameState.data.layout.width/2-self.red),int(gameState.data.layout.height/2))
+        while(gameState.hasWall(half_position[0],half_position[1])):
+            half_position=(half_position[0],half_position[1]-1)    
+        
+        
         features = util.Counter()
         successor = self.getSuccessor(gameState, action)
         
@@ -233,12 +240,18 @@ class GTDefensiveReflexAgent(TestReflexCaptureAgent):
         if self.target_position==myPos:
             self.target_position=None
     ##Update self.scare
-        if self.scare==0:
-            self.scare=CapsuleMonitor(self, gameState,self.scare)
-        elif self.scare==1:
-            self.scare=CapsuleMonitor(self, gameState,self.scare)
+        self.scare=CapsuleMonitor(self, gameState,self.scare)
         missingfoodinf=getMissingFood(self, gameState)
+        
     
+        ##====A-star Example====:
+        key_pos=keyPositions(self, gameState)#key_pos is a list
+        goalPosition, Path=aStarSearch(gmagent=self, gameState=gameState, goalPositions=key_pos, returngoalPosition= True)
+        #print(action,Path, goalPosition)
+        
+        ##====END OF A-star Example====
+        
+        
         dist_miss=0
         if len(missingfoodinf)>0:
             #Weight should be modified
@@ -284,6 +297,16 @@ class GTDefensiveReflexAgent(TestReflexCaptureAgent):
 
 def kmeans(myFood, parameter=6):
     """    
+    Input:
+        *myFood: A grid of two dimensional data with value True of False
+        *parameter: The espected amount of foods in each cluster. Used to find out
+        how many clusters are needed: k = len(food)/parameter
+    
+    Output:
+        *new_centers(list): the k centers of the food. Each element in this list is 
+        in the form of (tuple, int), where tuple indicating position and int is the 
+        amount of foods in this cluster.
+    
     myFood is grid variable defined in capture
        parameter is used to determine how many foods needed for a center. 
        amount of food / parameter = round down to k
@@ -337,6 +360,20 @@ def kmeans(myFood, parameter=6):
 
 def getMissingFood(gmagent, gameState, steps=6):
     """
+    Input:
+        *gmagent: Game agent, as self in your agent function
+        *gameState: the Game State
+        *steps: the discounted factor, indicating how many moves ahead you are taking into account
+        neglecting other previous histories
+    
+            
+    Output:
+        *ret_list: the return list, with the form of each element of (tuple, int), where tuple is the 
+        position of the nearest food to the missing food and int is the steps away from current state.
+        for example, (1,3),5, means the position (1,3) is the closest food to the missing food and it is 
+        5 moves away from my current state
+        
+        
     This function gives the information of missing food within previous n(default=3) steps
     
     This function takes gameState as input and return a list [((1,3),1), ((1,4),2), (1,5),3)] 
@@ -370,6 +407,17 @@ def getMissingFood(gmagent, gameState, steps=6):
   
 
 def CapsuleMonitor(gmagent, gameState, scare, last=40):
+    """
+    Input:
+        gmagent: Game Agent, as self in your agent
+        gameState: Game State
+        scare: indicating if the agent is scared or not, initially 0, 1 if scared
+        
+    Output:
+        scare(int): 0/1 indicating the current scare state 
+    
+    """
+    
     if scare==0:
         index=-1
         preind=index-1
@@ -384,6 +432,16 @@ def CapsuleMonitor(gmagent, gameState, scare, last=40):
     return scare
 
 def keyPositions(gmagent, gameState):
+    """
+    Input:
+        gmagent: Game Agent
+        gameState: Game State
+        
+    Output:
+        validPositions(list):A list of key positions that is on or close(or 3 steps away from) the boundries
+           
+    
+    """
     #curfood=gmagent.getFoodYouAreDefending(gmagent.observationHistory[0]).asList()
     half_position=(int(gameState.data.layout.width/2-gmagent.red),int(gameState.data.layout.height/2))
     while(gameState.hasWall(half_position[0],half_position[1])):
@@ -406,8 +464,55 @@ def keyPositions(gmagent, gameState):
     
     return validPositions
 
+def aStarSearch(gmagent, gameState, goalPositions, startPosition=None, avoidPositions=[], returngoalPosition=False):
+    """
+    Input:
+        gmagent: Game Agent
+        gameState: Game State
+        goalPositions: A list, containing all the possible goal positions
+        startPosition: The start position, by default it is the agent's current position        
+        avoidPositions: A list containing all the opponents' ghost positions
+        returngoalPosition: boolean, return the goal position if True
+        
+    Output:
+        Path: A list containing the actions needed from current position to goal position
+        CurrentPosition: return only when returngoalPosition is True. return the goal position
+        
+        
+    """
+    walls = gameState.getWalls()
+    width = walls.width
+    height = walls.height
+    walls = walls.asList()
+    if startPosition==None:
+        startPosition=gmagent.getCurrentObservation().getAgentPosition(gmagent.index)
+    
+    actions = [Directions.NORTH, Directions.SOUTH, Directions.EAST, Directions.WEST]
+    actionVectors = [(int(Actions.directionToVector(action)[0]), int(Actions.directionToVector(action)[1])) for action in actions]
+    currentPosition, currentPath, currentCost = startPosition, [], 0
 
+    queue = util.PriorityQueueWithFunction(lambda element: element[2] +   # The current cost
+                                           width * height if element[0] in avoidPositions else 0 +  # Avoid enemy locations
+                                           min(util.manhattanDistance(element[0], endPosition) for endPosition in goalPositions))
+    # No Revisits
+    visited = set([currentPosition])
 
+    while currentPosition not in goalPositions:
+        possiblePositions = [((currentPosition[0] + vector[0], currentPosition[1] + vector[1]), action) for vector, action in zip(actionVectors, actions)]
+        legalPositions = [(position, action) for position, action in possiblePositions if position not in walls]
+        for position, action in legalPositions:
+            if position not in visited:
+                visited.add(position)
+                queue.push((position, currentPath + [action], currentCost + 1))                
+        if queue.isEmpty():##Just in case
+            return None
+        else:
+            currentPosition, currentPath, currentTotal = queue.pop()            
+    if returngoalPosition:
+        return currentPath, currentPosition
+    else:
+        return currentPath
+    return currentPath
 
 
 
