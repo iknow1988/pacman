@@ -1210,7 +1210,7 @@ class DefensiveQAgent(ApproximateQAgent):
 
     def __init__(self, index, **args):
         ApproximateQAgent.__init__(self, index, **args)
-        self.filename = "./teams/poison/kazi_defensive.agent.weights"
+        self.filename = "teams/poison/kazi_defensive.agent.weights"
         self.weights = util.Counter()
 
         if os.path.exists(self.filename):
