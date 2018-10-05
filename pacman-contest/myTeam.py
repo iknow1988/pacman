@@ -477,9 +477,9 @@ class DefensiveUCT(UCTBasedAgent):
             minDistance = min([self.getMazeDistance(myPos, food) for food in self.foodToSecure])
             features['distanceToFoodToSecure'] = minDistance
 
-        #if len(invaders)<1:
-        #    if gameState.getAgentState(self.index).isPacman:
-        #        features['isPacman']=100
+        if len(invaders)<1:
+            if gameState.getAgentState(self.index).isPacman:
+                features['isPacman']=100
             
 
         return features
@@ -559,7 +559,7 @@ class DefensiveUCT(UCTBasedAgent):
     def chooseAction(self, gameState):
         # You can profile your evaluation time by uncommenting these lines
         start = time.time()
-        print(gameState)
+        #print(gameState)
         # Get valid actions. Staying put is almost never a good choice, so
         # the agent will ignore this action.
         all_actions = gameState.getLegalActions(self.index)

@@ -9,8 +9,9 @@
             "type": "python",
             "request": "launch",
             "program": "${workspaceFolder}/pacman-contest/capture.py",
+            "cwd": "${workspaceFolder}/pacman-contest/",
             "args": [
-                "-r ${workspaceFolder}/pacman-contest/baselineTeam", "-b ${workspaceFolder}/pacman-contest/baselineTeam", "-l RANDOM42"
+                "-r","myTeam-DG-RL", "-b","baselineTeam","-l","RANDOM23"
             ],
             "console": "integratedTerminal"
         },
