@@ -39,9 +39,13 @@ class ApproximateQAgent(CaptureAgent):
 		self.lastState = None
 		self.lastAction = None
 		self.start = None
+		self.target_position = None
+		self.inLoopCount = util.Counter()
+		self.max_score = 0.0
 
 	def registerInitialState(self, gameState):
 		self.start = gameState.getAgentPosition(self.index)
+		self.target_position = self.start
 		CaptureAgent.registerInitialState(self, gameState)
 
 		# get middle
@@ -55,17 +59,25 @@ class ApproximateQAgent(CaptureAgent):
 		for i in midPosition:
 			if not gameState.hasWall(i[0], i[1]) and i != self.start:
 				entrances.append(i)
+		distances = util.Counter()
+		for entrance in entrances:
+			dist = 0
+			for food in self.getFoodYouAreDefending(gameState).asList():
+				dist = dist + self.getMazeDistance(food, entrance)
+			distances[entrance] = dist
+		# self.entrances = distances
 		self.entrances = entrances
+		self.minDistantEntrance = min(distances, key=distances.get)
 		self.gridSize = self.walls .width * self.walls .height
 		self.initialDefendingFoodCount = len(self.getFoodYouAreDefending(gameState).asList())
+		self.opponentScore = 0
+		self.max_score = max(len(self.getFood(gameState).asList())-2, 1)
 
 	def computeActionFromQValues(self, gameState):
 		actions = gameState.getLegalActions(self.index)
 		values = [self.getQValue(gameState, a) for a in actions]
-
 		maxValue = max(values)
 		bestActions = [a for a, v in zip(actions, values) if v == maxValue]
-
 		return random.choice(bestActions)
 
 	def doAction(self, state, action):
@@ -73,6 +85,7 @@ class ApproximateQAgent(CaptureAgent):
 		self.lastAction = action
 
 	def chooseAction(self, gameState):
+		# start = time.time()
 		actions = gameState.getLegalActions(self.index)
 		action = None
 		if util.flipCoin(self.epsilon):
@@ -81,6 +94,7 @@ class ApproximateQAgent(CaptureAgent):
 			action = self.computeActionFromQValues(gameState)
 
 		self.doAction(gameState, action)  # from Q learning agent
+		# print 'eval time for agent %d: %.4f' % (self.index, time.time() - start)
 		return action
 
 	def observeTransition(self, state, action, nextState, deltaReward):
@@ -115,52 +129,63 @@ class ApproximateQAgent(CaptureAgent):
 			self.weights[feature] = weights[feature] + self.alpha * difference * features[feature]
 
 
-class DefensiveApproximateQAgent(ApproximateQAgent):
+class DefensiveQAgent(ApproximateQAgent):
 
 	def __init__(self, index, **args):
 		ApproximateQAgent.__init__(self, index, **args)
-		self.filename = "defensive.agent.weights"
+		self.filename = "kazi_defensive.agent.weights"
 		self.weights = util.Counter()
-		if os.path.exists(self.filename):
-			with open(self.filename, "rb") as f:
-				self.weights = pickle.load(f)
-				print self.weights
+		with open(self.filename, "rb") as f:
+			self.weights = pickle.load(f)
 
 	def final(self, state):
 		with open(self.filename, 'wb') as f:
 			pickle.dump(self.weights, f)
-		CaptureAgent.final(self, state)
+		# print "Updated", self.weights
+		ApproximateQAgent.final(self, state)
 
 	def getFeatures(self, state, action):
 		features = util.Counter()
-
 		myPosition = state.getAgentState(self.index).getPosition()
 		successor = self.getSuccessor(state, action)
 		newState = successor.getAgentState(self.index)
 		newPos = newState.getPosition()
+		self.inLoopCount[newPos] = self.inLoopCount[newPos] + 1
 		invaders = self.getInvaders(state)
 		missingFoods = self.getMissingFoods(state)
-
 		features["bias"] = 1.0
 		features['numOfInvaders'] = len(invaders)
+		# print "FOOD LEFT: ", len(self.getFoodYouAreDefending(state).asList())
+		if self.target_position == newPos:
+			entrances = self.entrances
+			distances = util.Counter()
+			for entrance in entrances:
+				dist = 0
+				for food in self.getFoodYouAreDefending(state).asList():
+					dist = dist + self.getMazeDistance(food, entrance)
+				distances[entrance] = dist
+			keyPos = min(distances, key=distances.get)
+			self.target_position = keyPos
+		features['invaderDistance'] = 0.0
+		distanceToInvaders = [0]
 		if len(invaders) > 0:
 			distanceToInvaders = [self.getMazeDistance(newPos, a.getPosition()) for a in invaders]
 			features['invaderDistance'] = min(distanceToInvaders) * 1.0 / self.gridSize
-			if newState.scaredTimer > 0:
-				features['scaredState'] = (min(distanceToInvaders) - newState.scaredTimer) * 1.0 / self.gridSize
-			else:
-				features['scaredState'] = 0
+			features["isPacman"] = 0.0
+			if newState.isPacman:
+				features["isPacman"] = -1.0 * min(distanceToInvaders) * 1.0 / self.gridSize
+		features['scaredState'] = 0.0
+		if newState.scaredTimer > 0:
+			features['scaredState'] = (min(distanceToInvaders) - newState.scaredTimer) * 1.0 / self.gridSize
 
-		elif len(missingFoods) > 0:
-			dist_miss = [self.getMazeDistance(newPos, a) for a,i in missingFoods]
-			features['missingFoodDistance'] = min(dist_miss) * 1.0 / self.gridSize
-		elif len(missingFoods) == 0:
-			maxDistance = max([self.getMazeDistance(newPos, food) for food in self.getFoodYouAreDefending(state).asList()])
-			features['maximumFoodDistance'] = maxDistance * 1.0 / self.gridSize
-		else:
-			entrances = self.entrances
-			pos = entrances[int(random.uniform(0, len(entrances)))]
-			features['distanceToEntrance'] = self.getMazeDistance(pos, newPos) * 1.0 / self.gridSize
+		dist_miss = 0.0
+		if len(missingFoods) > 0:
+			for pos, i in missingFoods:
+				dist_miss += self.getMazeDistance(pos, newPos)
+		features['missingFoodDistance'] = dist_miss * 1.0 / self.gridSize
+
+		minDistEntrance = self.getMazeDistance(newPos, self.target_position)
+		features['distanceToEntrance'] = minDistEntrance * 1.0 / self.gridSize
 
 		return features
 
@@ -175,11 +200,9 @@ class DefensiveApproximateQAgent(ApproximateQAgent):
 		reward = self.getRecoveredFoodCount(state, lastState)
 		reward -= len(self.getInvaders(state)) - len(self.getInvaders(lastState))
 		reward -= 1
-		distancePosition = self.getMazeDistance(state.getAgentState(self.index).getPosition(),
-												lastState.getAgentState(self.index).getPosition())
+		distancePosition = self.getMazeDistance(state.getAgentState(self.index).getPosition(), lastState.getAgentState(self.index).getPosition())
 		if distancePosition > 1:
-			reward -= distancePosition * -1.0/self.gridSize
-
+			reward -= distancePosition * 1.0/self.gridSize
 		return reward
 
 	def getInvaders(self, state):
@@ -192,27 +215,27 @@ class DefensiveApproximateQAgent(ApproximateQAgent):
 		return len(self.getFoodYouAreDefending(state).asList()) - len(self.getFoodYouAreDefending(lastState).asList())
 
 	def getMissingFoods(self, gameState, steps=6):
-		counter = min((len(self.observationHistory) - 1), steps)
-		missingFoods = []
-		for x in range(1, counter + 1):
+		itera = min((len(self.observationHistory) - 1), steps)
+		ret_list = []
+		for x in range(1, itera + 1):
 			index = -x
 			preind = index - 1
-			currentFoodList = self.getFoodYouAreDefending(self.observationHistory[index]).asList()
-			previousFoodList = self.getFoodYouAreDefending(self.observationHistory[preind]).asList()
-			missing = [i for i in previousFoodList if i not in currentFoodList]
-			if len(missing) != 0:
-				missing = missing[0]
+			curfoodlist = self.getFoodYouAreDefending(self.observationHistory[index]).asList()
+			prefoodlist = self.getFoodYouAreDefending(self.observationHistory[preind]).asList()
+			missingfoods = [i for i in prefoodlist if i not in curfoodlist]
+			if len(missingfoods) != 0:
+				missingfoods = missingfoods[0]
 				dist = 9999999
-				food_pos = previousFoodList[0]
-				for food in previousFoodList:
-					if food != missing:
-						cur_dist = self.getMazeDistance(missing, food)
+				food_pos = prefoodlist[0]
+				for food in prefoodlist:
+					if food != missingfoods:
+						cur_dist = self.getMazeDistance(missingfoods, food)
 						if cur_dist < dist:
 							dist = cur_dist
 							food_pos = food
-				missingFoods.append((food_pos, x))
+				ret_list.append((food_pos, x))
 
-		return missingFoods
+		return ret_list
 
 	def computeActionFromQValues(self, gameState):
 		actions = gameState.getLegalActions(self.index)
