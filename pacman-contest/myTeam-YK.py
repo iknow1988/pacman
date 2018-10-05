@@ -279,7 +279,7 @@ class GTDefensiveReflexAgent(TestReflexCaptureAgent):
 
     def getWeights(self, gameState, action):
       ##Priority Different
-      return {'invaderDistance': -100000, 'numInvaders': -100000, 'MissingFood':-1000,'targetPosition':-100,
+      return {'invaderDistance': -100000, 'numInvaders': -100000, 'MissingFood':-1000,'targetPosition':-1000000,
               'onDefense': 10000, 'stop': -10, 'reverse': -2}
 
 def kmeans(myFood, parameter=6):
@@ -398,7 +398,14 @@ def keyPositions(gmagent, gameState):
     ThirdquaterPosition=(int((gameState.data.layout.width/2)-6*(gmagent.red-0.5)),int(gameState.data.layout.height*3/4))
     while(gameState.hasWall(ThirdquaterPosition[0],ThirdquaterPosition[1])):
         ThirdquaterPosition=(ThirdquaterPosition[0],ThirdquaterPosition[1]-1)
-    return [half_position, FirstquaterPosition, ThirdquaterPosition]
+        
+    validPositions=[pos for pos in [half_position, FirstquaterPosition, ThirdquaterPosition] if pos[0]>=0 and pos[1]>=0]
+    start_position=gmagent.observationHistory[0].getAgentPosition(gmagent.index)
+    ##we dont want our key positions to be too close to the starting position
+    validPositions=[pos for pos in validPositions if gmagent.getMazeDistance(pos,start_position)>=5]
+    
+    return validPositions
+
 
 
 
