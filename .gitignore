@@ -5,3 +5,6 @@ pacman-contest/offensive.agent.weights
 pacman-contest/out.txt
 pacman-contest/train.sh
 .vscode/launch.json
+pacman-contest/teams/poison/offensive.agent.weights
+pacman-contest/teams/poison/defensive.agent.weights
+pacman-contest/myTeam-DG-RL.pyc
