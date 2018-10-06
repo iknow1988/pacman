@@ -464,6 +464,7 @@ def keyPositions(gmagent, gameState):
     
     return validPositions
 
+
 def aStarSearch(gmagent, gameState, goalPositions, startPosition=None, avoidPositions=[], returngoalPosition=False):
     """
     Input:
@@ -514,6 +515,43 @@ def aStarSearch(gmagent, gameState, goalPositions, startPosition=None, avoidPosi
         return currentPath
     return currentPath
 
+
+def EscapePath(gmagent, gameState, returngoalPosition=False):
+    ##astar:gmagent, gameState, goalPositions, startPosition=None, avoidPositions=[], returngoalPosition=False
+    """
+    Input:
+        gmagent: Game Agent
+        gameState: Current Game State
+        returngoalPosition: not return position if it's False
+        
+    Output:
+        A escape plan path to the boundries       
+    
+    IDEA:
+        It can be implemented into Offensive Agent and used when the opponents' ghosts are
+        within 2 steps away.
+    """
+    ##get ghost position
+    ###get own position
+    ####call A-star..
+    myPos = gmagent.getCurrentObservation().getAgentPosition(gmagent.index)
+    enemies = [gameState.getAgentState(i) for i in gmagent.getOpponents(gameState)]
+    chaser = [a.getPosition() for a in enemies if not a.isPacman and a.getPosition() != None]
+    
+    walls = gameState.getWalls()
+    height = walls.height
+    walls = walls.asList()
+
+    half_position=(int(gameState.data.layout.width/2-gmagent.red),int(gameState.data.layout.height/2))
+    while(gameState.hasWall(half_position[0],half_position[1])):
+        half_position=(half_position[0],half_position[1]-1) 
+    
+    goalPositions = [(half_position[0], height_position) for height_position in range(1, height-1) if not gameState.hasWall(half_position[0], height_position)]
+    print(chaser)
+    
+    if len(chaser)!=0:
+        return aStarSearch(gmagent, gameState, goalPositions=goalPositions, startPosition=myPos, avoidPositions=chaser, returngoalPosition=False)
+    return []
 
 
 
