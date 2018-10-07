@@ -556,5 +556,39 @@ def EscapePath(gmagent, gameState, returngoalPosition=False):
 
 
 
+def FindAlternativeFood(gmagent, gameState, returngoalPosition=True):
+    myPos = gmagent.getCurrentObservation().getAgentPosition(gmagent.index)
+    enemies = [gameState.getAgentState(i) for i in gmagent.getOpponents(gameState)]
+    chasers = [a.getPosition() for a in enemies if not a.isPacman and a.getPosition() != None]
+    print("+++++++++++++++++", chasers, "+++++++++++++++++++=")
+    walls = gameState.getWalls()
+    
+    foodList = gmagent.getFood(gameState).asList()    
+    
+    height = walls.height
+    width = walls.width
+    print("HHHHEIGHT", height, width, height/4, width/4)
+    walls = walls.asList()
+    half_position=(int(gameState.data.layout.width/2-gmagent.red),int(gameState.data.layout.height/2))
+    while(gameState.hasWall(half_position[0],half_position[1])):
+        half_position=(half_position[0],half_position[1]-1) 
+    
+    
+    goalPositions = foodList
+    
+    avoidPos=[]
+    X=min(width/4, 3)
+    Y=min(height/4, 3)
+    
+    for chaser in chasers:
+        for posX in range(int(max(1,chaser[0]-X)), int(min(width,chaser[0]+X))):
+            for posY in range(int(max(0,chaser[0]-Y)), int(min(height,chaser[0]+Y))):
+                if not gameState.hasWall(posX, posY):
+                    avoidPos.append((posX, posY))
+    print("========", avoidPos, "=========")           
+    ##Here return a list and the position 
+    return aStarSearch(gmagent, gameState, goalPositions=goalPositions, startPosition=myPos, avoidPositions=avoidPos, returngoalPosition=returngoalPosition)
+     
+    
 
 
