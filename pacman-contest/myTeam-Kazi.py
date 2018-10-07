@@ -68,21 +68,18 @@ class ApproximateQAgent(CaptureAgent):
 		self.lastState = None
 		self.lastAction = None
 		self.start = None
-		self.target_position = None
-		self.inLoopCount = util.Counter()
 		self.max_score = 0.0
 
 	def registerInitialState(self, gameState):
-		self.start = gameState.getAgentPosition(self.index)
 		CaptureAgent.registerInitialState(self, gameState)
-
+		self.start = gameState.getAgentPosition(self.index)
 		# get middle
 		self.walls = gameState.getWalls()
-		if(self.red):
+		if (self.red):
 			offset = 2
 		else:
 			offset = -2
-		midPosition=[(self.walls.width/2 - offset, i) for i in range(1,self.walls .height-1)]
+		midPosition = [(self.walls.width / 2 - offset, i) for i in range(1, self.walls.height - 1)]
 		entrances = []
 		for i in midPosition:
 			if not gameState.hasWall(i[0], i[1]) and i != self.start:
@@ -96,10 +93,10 @@ class ApproximateQAgent(CaptureAgent):
 		# self.entrances = distances
 		self.entrances = entrances
 		self.minDistantEntrance = min(distances, key=distances.get)
-		self.gridSize = self.walls .width * self.walls .height
+		self.gridSize = self.walls.width * self.walls.height
 		self.initialDefendingFoodCount = len(self.getFoodYouAreDefending(gameState).asList())
 		self.opponentScore = 0
-		self.max_score = max(len(self.getFood(gameState).asList())-2, 1)
+		self.max_score = max(len(self.getFood(gameState).asList()) - 2, 1)
 
 	def computeActionFromQValues(self, gameState):
 		actions = gameState.getLegalActions(self.index)
@@ -161,6 +158,8 @@ class OffensiveQAgent(ApproximateQAgent):
 
 	def __init__(self, index, **args):
 		ApproximateQAgent.__init__(self, index, **args)
+
+	def registerInitialState(self, gameState):
 		self.filename = "kazi_offensive.agent.weights"
 		self.weights = util.Counter()
 		if os.path.exists(self.filename):
@@ -171,6 +170,7 @@ class OffensiveQAgent(ApproximateQAgent):
 		self.freeTimerToEatFood = 3
 		self.target_position_offensive = None
 		self.foodTryCount = 0
+		ApproximateQAgent.registerInitialState(self, gameState)
 
 	def final(self, state):
 		with open(self.filename, 'wb') as f:
@@ -381,13 +381,16 @@ class DefensiveQAgent(ApproximateQAgent):
 
 	def __init__(self, index, **args):
 		ApproximateQAgent.__init__(self, index, **args)
+
+	def registerInitialState(self, gameState):
 		self.filename = "kazi_defensive.agent.weights"
 		self.weights = util.Counter()
 		self.carryLimit = 3
+		self.target_position = None
 		if os.path.exists(self.filename):
 			with open(self.filename, "r") as f:
 				self.weights = pickle.load(f)
-		# print "initial", self.weights
+		ApproximateQAgent.registerInitialState(self, gameState)
 
 	def final(self, state):
 		with open(self.filename, 'w') as f:
@@ -401,7 +404,6 @@ class DefensiveQAgent(ApproximateQAgent):
 		successor = self.getSuccessor(state, action)
 		newState = successor.getAgentState(self.index)
 		newPos = newState.getPosition()
-		self.inLoopCount[newPos] = self.inLoopCount[newPos] + 1
 		invaders = self.getInvaders(state)
 		ghosts = self.getGhosts(successor)
 		missingFoods = self.getMissingFoods(state)
@@ -537,6 +539,7 @@ class DefensiveQAgent(ApproximateQAgent):
 		return ret_list
 
 	def computeActionFromQValues(self, gameState):
+		# return 'Stop'
 		actions = gameState.getLegalActions(self.index)
 		actions.remove('Stop')
 		values = [self.getQValue(gameState, a) for a in actions]
@@ -544,5 +547,5 @@ class DefensiveQAgent(ApproximateQAgent):
 		maxValue = max(values)
 		bestActions = [a for a, v in zip(actions, values) if v == maxValue]
 		best = random.choice(bestActions)
-		# print best, maxValue
+
 		return best
