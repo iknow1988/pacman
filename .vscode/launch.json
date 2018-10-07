@@ -11,7 +11,7 @@
             "program": "${workspaceFolder}/pacman-contest/capture.py",
             "cwd": "${workspaceFolder}/pacman-contest/",
             "args": [
-                "-r","myTeam-DG-RL", "-b","baselineTeam","-l","tinyCapture","-t"
+                "-r","myTeam-DG-RL", "-b","baselineTeam","-l","tinyCapture",
             ],
             "console": "integratedTerminal"
         },
