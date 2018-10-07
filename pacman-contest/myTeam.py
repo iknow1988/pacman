@@ -1239,15 +1239,20 @@ class DefensiveQAgent(ApproximateQAgent):
         features["bias"] = 1.0
         features['numOfInvaders'] = len(invaders)
         if self.target_position == newPos:
-            entrances = self.entrances
-            distances = util.Counter()
-            for entrance in entrances:
-                dist = 0
-                for food in self.getFoodYouAreDefending(state).asList():
-                    dist = dist + self.getMazeDistance(food, entrance)
-                distances[entrance] = dist
-            keyPos = min(distances, key=distances.get)
-            self.target_position = keyPos
+            if self.getScore(successor) > 2 or state.getAgentState(self.index).numCarrying >= self.carryLimit:
+                entrances = self.entrances
+                distances = util.Counter()
+                for entrance in entrances:
+                    dist = 0
+                    for food in self.getFoodYouAreDefending(state).asList():
+                        dist = dist + self.getMazeDistance(food, entrance)
+                    distances[entrance] = dist
+                keyPos = min(distances, key=distances.get)
+                self.target_position = keyPos
+            else:
+                foods = self.getFood(successor).asList()
+                closest = min(foods, key=lambda x: self.getMazeDistance(newPos, x))
+                self.target_position = closest
         features['invaderDistance'] = 0.0
         distanceToInvaders = [0]
         if len(invaders) > 0:
