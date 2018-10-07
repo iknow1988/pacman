@@ -226,10 +226,10 @@ class GTDefensiveReflexAgent(TestReflexCaptureAgent):
   
     def getFeatures(self, gameState, action):
         
-        
         half_position=(int(gameState.data.layout.width/2-self.red),int(gameState.data.layout.height/2))
         while(gameState.hasWall(half_position[0],half_position[1])):
             half_position=(half_position[0],half_position[1]-1)    
+        
         
         
         features = util.Counter()
@@ -239,15 +239,30 @@ class GTDefensiveReflexAgent(TestReflexCaptureAgent):
         myPos = myState.getPosition()
         if self.target_position==myPos:
             self.target_position=None
-    ##Update self.scare
-        self.scare=CapsuleMonitor(self, gameState,self.scare)
+        ##Update self.scare
         missingfoodinf=getMissingFood(self, gameState)
+        
+        ##========TESTING CLOGGING=========##
+        enemies = [gameState.getAgentState(i) for i in self.getOpponents(gameState)]
+        chaser = [a.getPosition() for a in enemies if a.isPacman and a.getPosition() != None]
+        
+        features['Clog']=0
+        if len(chaser) > 0:
+            if CloggingOpponent(self, gameState, returngoalPosition = False) == True and action == Directions.STOP :
+                features['Clog']=1000000000
         
     
         ##====A-star Example====:
         key_pos=keyPositions(self, gameState)#key_pos is a list
-        goalPosition, Path=aStarSearch(gmagent=self, gameState=gameState, goalPositions=key_pos, returngoalPosition= True)
-        #print(action,Path, goalPosition)
+        
+        Path, goalPosition=aStarSearch(gmagent=self, gameState=gameState, goalPositions=key_pos, returngoalPosition= True)
+        
+        
+        Path2=EscapePath(gmagent=self, gameState=gameState, returngoalPosition=False)
+        
+        iii=FindAlternativeFood(self, gameState, returngoalPosition=True)
+     
+
         
         ##====END OF A-star Example====
         
@@ -293,7 +308,7 @@ class GTDefensiveReflexAgent(TestReflexCaptureAgent):
     def getWeights(self, gameState, action):
       ##Priority Different
       return {'invaderDistance': -100000, 'numInvaders': -100000, 'MissingFood':-1000,'targetPosition':-1000000,
-              'onDefense': 10000, 'stop': -10, 'reverse': -2}
+              'onDefense': 10000, 'stop': -10, 'reverse': -2, 'Clog': 100000000}
 
 def kmeans(myFood, parameter=6):
     """    
@@ -464,8 +479,7 @@ def keyPositions(gmagent, gameState):
     
     return validPositions
 
-
-def aStarSearch(gmagent, gameState, goalPositions, startPosition=None, avoidPositions=[], returngoalPosition=False):
+def aStarSearch(gmagent, gameState, goalPositions, startPosition=None, avoidPositions=[], returngoalPosition=False, returnCost= False):
     """
     Input:
         gmagent: Game Agent
@@ -492,9 +506,10 @@ def aStarSearch(gmagent, gameState, goalPositions, startPosition=None, avoidPosi
     actionVectors = [(int(Actions.directionToVector(action)[0]), int(Actions.directionToVector(action)[1])) for action in actions]
     currentPosition, currentPath, currentCost = startPosition, [], 0
 
-    queue = util.PriorityQueueWithFunction(lambda element: element[2] +   # The current cost
-                                           width * height if element[0] in avoidPositions else 0 +  # Avoid enemy locations
-                                           min(util.manhattanDistance(element[0], endPosition) for endPosition in goalPositions))
+    queue = util.PriorityQueueWithFunction(lambda entry: entry[2] +   # Total cost so far
+                                           min(util.manhattanDistance(entry[0], endPosition) for endPosition in goalPositions))
+                                           #width * height if entry[0] in avoidPositions else 0 +  # Avoid enemy locations like the plague
+                                           
     # No Revisits
     visited = set([currentPosition])
 
@@ -504,11 +519,24 @@ def aStarSearch(gmagent, gameState, goalPositions, startPosition=None, avoidPosi
         for position, action in legalPositions:
             if position not in visited:
                 visited.add(position)
-                queue.push((position, currentPath + [action], currentCost + 1))                
+                AvoidValue=0 
+                if position in avoidPositions:
+                    AvoidValue=width * height
+                
+                """value2=util.manhattanDistance(position, goalPositions[0])
+                
+                for endPosition in goalPositions:
+                    if util.manhattanDistance(position, endPosition) <value2:
+                        value2=util.manhattanDistance(position, endPosition)"""
+                
+                queue.push((position, currentPath + [action], currentCost + 1 + AvoidValue ))                
         if queue.isEmpty():##Just in case
             return None
         else:
-            currentPosition, currentPath, currentTotal = queue.pop()            
+            currentPosition, currentPath, currentCost = queue.pop()    
+    if returnCost:
+        return currentPath, currentPosition, currentCost
+    
     if returngoalPosition:
         return currentPath, currentPosition
     else:
@@ -547,12 +575,10 @@ def EscapePath(gmagent, gameState, returngoalPosition=False):
         half_position=(half_position[0],half_position[1]-1) 
     
     goalPositions = [(half_position[0], height_position) for height_position in range(1, height-1) if not gameState.hasWall(half_position[0], height_position)]
-    print(chaser)
     
     if len(chaser)!=0:
         return aStarSearch(gmagent, gameState, goalPositions=goalPositions, startPosition=myPos, avoidPositions=chaser, returngoalPosition=False)
     return []
-
 
 
 def FindAlternativeFood(gmagent, gameState, returngoalPosition=True):
@@ -580,10 +606,72 @@ def FindAlternativeFood(gmagent, gameState, returngoalPosition=True):
     for chaser in chasers:
         for posX in range(int(max(1,chaser[0]-X)), int(min(width,chaser[0]+X))):
             for posY in range(int(max(0,chaser[0]-Y)), int(min(height,chaser[0]+Y))):
-                if not gameState.hasWall(posX, posY):
+                if not (gameState.hasWall(posX, posY) or ((abs(posX-chaser[0])+abs(posY-chaser[1])))<=4):
                     avoidPos.append((posX, posY))
     ##Here return a list and the position 
     return aStarSearch(gmagent, gameState, goalPositions=goalPositions, startPosition=myPos, avoidPositions=avoidPos, returngoalPosition=returngoalPosition)
-  
+     
+ 
+def CloggingOpponent(gmagent, gameState, returngoalPosition = False):
+    """
+    CLOGGING NOT EATING OPPONENTS!!!
+    Input: 
+        gmagent: Game Agent
+        gameState: Game State
+        
+    Output: 
+        True/False: Stop your agent when this function returns true.
+    
+    
+    """
+    myPos = gmagent.getCurrentObservation().getAgentPosition(gmagent.index)
+    enemies = [gameState.getAgentState(i) for i in gmagent.getOpponents(gameState)]
+    chaser = [a.getPosition() for a in enemies if a.isPacman and a.getPosition() != None]
+    
+    walls = gameState.getWalls()
+    height = walls.height
+    width = walls.width
+    walls = walls.asList()
+    #22 38 792
+    half_position=(int(gameState.data.layout.width/2-gmagent.red),int(gameState.data.layout.height/2))
+    while(gameState.hasWall(half_position[0],half_position[1])):
+        half_position=(half_position[0],half_position[1]-1) 
+        
+    goalPositions = [(half_position[0], height_position) for height_position in range(3, height-1) if not gameState.hasWall(half_position[0], height_position)]
+    avoidPositions=[myPos]
+    
+    startPosition=None
+    
+    if len(chaser)>0:
+        startPosition=chaser[0]
+        
+    Path, Position, Cost =aStarSearch(gmagent, gameState, goalPositions, startPosition=startPosition, avoidPositions=avoidPositions, returngoalPosition=False, returnCost= True)
+    print ("------------",  Cost)
+    if Cost > width * height:
+        return True
+    #width * height
+    return False
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
