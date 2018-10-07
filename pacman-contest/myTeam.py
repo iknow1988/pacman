@@ -1212,7 +1212,7 @@ class DefensiveQAgent(ApproximateQAgent):
         ApproximateQAgent.__init__(self, index, **args)
         self.filename = "teams/Poison/kazi_defensive.agent.weights"
         self.weights = util.Counter()
-
+        self.carryLimit = 5
         if os.path.exists(self.filename):
             with open(self.filename, "r") as f:
                 self.weights = pickle.load(f)
