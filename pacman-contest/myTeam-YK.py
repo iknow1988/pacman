@@ -226,6 +226,9 @@ class GTDefensiveReflexAgent(TestReflexCaptureAgent):
   
     def getFeatures(self, gameState, action):
         
+        CheckIfAgentStucking(self, gameState)
+        print(CheckIfAgentStucking(self, gameState))
+        
         half_position=(int(gameState.data.layout.width/2-self.red),int(gameState.data.layout.height/2))
         while(gameState.hasWall(half_position[0],half_position[1])):
             half_position=(half_position[0],half_position[1]-1)    
@@ -260,8 +263,9 @@ class GTDefensiveReflexAgent(TestReflexCaptureAgent):
         
         Path2=EscapePath(gmagent=self, gameState=gameState, returngoalPosition=False)
         
-        iii=FindAlternativeFood(self, gameState, returngoalPosition=True)
-     
+        goal_path, goal_pos=FindAlternativeFood(self, gameState, returngoalPosition=True)
+        if action == goal_path[0]:
+            features['goalpath']=100000
 
         
         ##====END OF A-star Example====
@@ -539,6 +543,7 @@ def aStarSearch(gmagent, gameState, goalPositions, startPosition=None, avoidPosi
     
     if returngoalPosition:
         return currentPath, currentPosition
+    
     else:
         return currentPath
     return currentPath
@@ -609,7 +614,13 @@ def FindAlternativeFood(gmagent, gameState, returngoalPosition=True):
                 if not (gameState.hasWall(posX, posY) or ((abs(posX-chaser[0])+abs(posY-chaser[1])))<=4):
                     avoidPos.append((posX, posY))
     ##Here return a list and the position 
-    return aStarSearch(gmagent, gameState, goalPositions=goalPositions, startPosition=myPos, avoidPositions=avoidPos, returngoalPosition=returngoalPosition)
+    currentPath, currentPosition=aStarSearch(gmagent, gameState, goalPositions=goalPositions, startPosition=myPos, avoidPositions=avoidPos, returngoalPosition=returngoalPosition)
+    steps=min(5, len(currentPath))
+    stackpath=[]
+    if steps>0:
+        for i in range(steps-1,-1,-1):
+            stackpath.append(currentPath[i])
+    return stackpath, currentPosition
      
  
 def CloggingOpponent(gmagent, gameState, returngoalPosition = False):
@@ -646,20 +657,27 @@ def CloggingOpponent(gmagent, gameState, returngoalPosition = False):
         startPosition=chaser[0]
         
     Path, Position, Cost =aStarSearch(gmagent, gameState, goalPositions, startPosition=startPosition, avoidPositions=avoidPositions, returngoalPosition=False, returnCost= True)
-    print ("------------",  Cost)
     if Cost > width * height:
         return True
     #width * height
     return False
 
 
-
-
-
-
-
-
-
+def CheckIfAgentStucking(gmagent, gameState, referhistory=10, countingfactor=3):
+    """
+    !!!JUST FOR OFFENSIVE AGENT!!!
+    return True when the agent is stuck
+    
+    """
+    
+    referhistory=min(referhistory,len(gmagent.observationHistory))
+    curposition=gameState.getAgentPosition(gmagent.index)
+    
+    for i in range(-1, -1-referhistory, -1):
+        historyposition2=gmagent.observationHistory[i].getAgentPosition(gmagent.index)
+        if curposition==historyposition2:
+            countingfactor-=1
+    return countingfactor<0
 
 
 
