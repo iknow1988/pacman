@@ -158,18 +158,13 @@ class OffensiveQAgent(ApproximateQAgent):
 
 	def __init__(self, index, **args):
 		ApproximateQAgent.__init__(self, index, **args)
-<<<<<<< Updated upstream
 
 	def registerInitialState(self, gameState):
-		self.filename = "teams/Poison/kazi_offensive.agent.weights"
-=======
 		self.filename = "kazi_offensive.agent.weights"
->>>>>>> Stashed changes
 		self.weights = util.Counter()
 		if os.path.exists(self.filename):
 			with open(self.filename, "rb") as f:
 				self.weights = pickle.load(f)
-<<<<<<< Updated upstream
 		else:
 			# self.weights = util.Counter({
 			# 	'bias': -4.921244227779046,
@@ -190,20 +185,11 @@ class OffensiveQAgent(ApproximateQAgent):
 		self.foodTryCount = 0
 		ApproximateQAgent.registerInitialState(self, gameState)
 
-	# def final(self, state):
-	# 	# with open(self.filename, 'wb') as f:
-	# 	# 	pickle.dump(self.weights, f)
-	# 	# print "Updated", self.weights
-	# 	CaptureAgent.final(self, state)
-=======
-		print "initial", self.weights
-
 	def final(self, state):
 		with open(self.filename, 'wb') as f:
 			pickle.dump(self.weights, f)
 		print "Updated", self.weights
 		CaptureAgent.final(self, state)
->>>>>>> Stashed changes
 
 	def getFeatures(self, state, action):
 		myPrevState = state.getAgentState(self.index)
@@ -214,8 +200,6 @@ class OffensiveQAgent(ApproximateQAgent):
 		myPos = myState.getPosition()
 		ghosts = self.getGhosts(successor)
 		features = util.Counter()
-
-<<<<<<< Updated upstream
 		minDistanceToInvaders = 0.0
 		minDistanceToFood = 0.0
 		distToGhostsList = [0.0]
@@ -267,8 +251,6 @@ class OffensiveQAgent(ApproximateQAgent):
 		features['distanceToGhost'] = minDistanceToInvaders
 		features['targetPosition'] = -self.getMazeDistance(myPos, self.target_position_offensive) * 1.0 / self.gridSize
 		# self.debugDraw(self.target_position_offensive, (1, 0, 0), clear=True)
-=======
-		# features["bias"] = 1.0
 		features['successorScore'] = -len(foodList)*1.0 / self.max_score
 		distanceToInvaders = 0.0
 		if len(ghosts) > 0:
@@ -285,7 +267,6 @@ class OffensiveQAgent(ApproximateQAgent):
 
 		features['distanceToFood'] = minDistance * 1.0 / self.gridSize
 
->>>>>>> Stashed changes
 		return features
 
 	def isOpponentScared(self,state):
@@ -305,7 +286,6 @@ class OffensiveQAgent(ApproximateQAgent):
 		return CaptureAgent.observationFunction(self, state)
 
 	def getRewards(self, state, lastState):
-<<<<<<< Updated upstream
 		foodEaten = self.getFoodCount(state, lastState)
 		reward = 0
 		reward += state.getScore() - lastState.getScore()
@@ -314,10 +294,8 @@ class OffensiveQAgent(ApproximateQAgent):
 		else:
 			if state.getAgentState(self.index).getPosition() in self.getFood(lastState).asList():
 				reward += 1
-=======
 		reward = state.getScore() - lastState.getScore()
 		reward -= 1
->>>>>>> Stashed changes
 
 		return reward
 
@@ -348,7 +326,6 @@ class OffensiveQAgent(ApproximateQAgent):
 
 		return weights * features
 
-<<<<<<< Updated upstream
 	def aStarSearch(self, gameState, goalPositions, startPosition=None, avoidPositions=[], returngoalPosition=False,
 					returnCost=False):
 		gmagent = self
@@ -429,14 +406,11 @@ class OffensiveQAgent(ApproximateQAgent):
 		return self.aStarSearch(gameState, goalPositions=possibleGoalPositions, startPosition=myPos, avoidPositions=avoidPos,
 						   returngoalPosition=returngoalPosition)
 
-=======
->>>>>>> Stashed changes
 
 class DefensiveQAgent(ApproximateQAgent):
 
 	def __init__(self, index, **args):
 		ApproximateQAgent.__init__(self, index, **args)
-<<<<<<< Updated upstream
 
 	def registerInitialState(self, gameState):
 		self.filename = "teams/Poison/kazi_defensive.agent.weights"
@@ -481,7 +455,7 @@ class DefensiveQAgent(ApproximateQAgent):
 	# 	# 	pickle.dump(self.weights, f)
 	# 	# print "Updated", self.weights
 	# 	ApproximateQAgent.final(self, state)
-=======
+
 		self.filename = "kazi_defensive.agent.weights"
 		self.weights = util.Counter()
 
@@ -503,7 +477,6 @@ class DefensiveQAgent(ApproximateQAgent):
 		with open(self.filename, 'w') as f:
 			pickle.dump(self.weights, f)
 		ApproximateQAgent.final(self, state)
->>>>>>> Stashed changes
 
 	def getFeatures(self, state, action):
 		features = util.Counter()
@@ -516,8 +489,6 @@ class DefensiveQAgent(ApproximateQAgent):
 		missingFoods = self.getMissingFoods(state)
 		features["bias"] = 1.0
 		features['numOfInvaders'] = len(invaders)
-<<<<<<< Updated upstream
-		# print "FOOD LEFT: ", len(self.getFoodYouAreDefending(state).asList())
 
 		if not self.target_position or self.target_position == myPosition:
 			if not self.target_position or len(self.getFoodYouAreDefending(state).asList()) == 0:
@@ -559,7 +530,6 @@ class DefensiveQAgent(ApproximateQAgent):
 					closest = min(foods, key=lambda x: self.getMazeDistance(newPos, x))
 					self.target_position = closest
 
-=======
 		if self.target_position == newPos:
 			entrances = self.entrances
 			distances = util.Counter()
@@ -570,7 +540,7 @@ class DefensiveQAgent(ApproximateQAgent):
 				distances[entrance] = dist
 			keyPos = min(distances, key=distances.get)
 			self.target_position = keyPos
->>>>>>> Stashed changes
+
 		features['invaderDistance'] = 0.0
 		distanceToInvaders = [0]
 		distanceToGhosts = [0]
