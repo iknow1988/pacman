@@ -1469,6 +1469,7 @@ class DefensiveQAgent(ApproximateQAgent):
             # 	'numOfInvaders': 1.5056732292001267,
             # 	'invaderDistance': -28.036091500393667
             # })
+            ####
             self.weights = util.Counter({
                 'bias': -4.8865635555343685,
                 'missingFoodDistance': -12.525337056313884,
