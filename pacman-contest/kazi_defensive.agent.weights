@@ -10,6 +10,7 @@ p2
 (dp3
 S'bias'
 p4
+<<<<<<< Updated upstream
 F-4.8865635555343685
 sS'missingFoodDistance'
 p5
@@ -29,6 +30,27 @@ F1.3442286774963974
 sS'invaderDistance'
 p10
 F-27.499290588725366
+=======
+F-4.758882061577526
+sS'missingFoodDistance'
+p5
+F-15.011247922792831
+sS'distanceToEntrance'
+p6
+F-11.296048376981942
+sS'scaredState'
+p7
+F1.4213596087834688
+sS'isPacman'
+p8
+F0.0820006119983627
+sS'numOfInvaders'
+p9
+F1.1297197260397647
+sS'invaderDistance'
+p10
+F-18.498833214894226
+>>>>>>> Stashed changes
 stp11
 Rp12
 .

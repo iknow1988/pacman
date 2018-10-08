@@ -1,20 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
+<<<<<<< Updated upstream
+    <list default="true" id="1896c77d-47b4-422e-88f3-c14d8cb56b1a" name="Default Changelist" comment="" />
+=======
     <list default="true" id="1896c77d-47b4-422e-88f3-c14d8cb56b1a" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pacman-contest/autorun.py" beforeDir="false" afterPath="$PROJECT_DIR$/pacman-contest/autorun.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pacman-contest/baselineTeam.py" beforeDir="false" afterPath="$PROJECT_DIR$/pacman-contest/baselineTeam.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pacman-contest/kazi_defensive.agent.weights" beforeDir="false" afterPath="$PROJECT_DIR$/pacman-contest/kazi_defensive.agent.weights" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pacman-contest/kazi_offensive.agent.weights" beforeDir="false" afterPath="$PROJECT_DIR$/pacman-contest/kazi_offensive.agent.weights" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pacman-contest/myTeam-Kazi.py" beforeDir="false" afterPath="$PROJECT_DIR$/pacman-contest/myTeam-Kazi.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pacman-contest/myTeam-YK.py" beforeDir="false" afterPath="$PROJECT_DIR$/pacman-contest/myTeam-YK.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pacman-contest/myTeam.py" beforeDir="false" afterPath="$PROJECT_DIR$/pacman-contest/myTeam.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pacman-contest/teams/Poison/.gitkeep" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/pacman-contest/teams/Poison/kazi_defensive.agent.weights" beforeDir="false" afterPath="$PROJECT_DIR$/pacman-contest/teams/Poison/kazi_defensive.agent.weights" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pacman-contest/teams/Poison/kazi_offensive.agent.weights" beforeDir="false" afterPath="$PROJECT_DIR$/pacman-contest/teams/Poison/kazi_offensive.agent.weights" afterDir="false" />
     </list>
+>>>>>>> Stashed changes
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -25,6 +23,7 @@
     <session id="-1971131361">
       <usages-collector id="statistics.lifecycle.project">
         <counts>
+<<<<<<< Updated upstream
           <entry key="project.closed" value="12" />
           <entry key="project.open.time.10" value="2" />
           <entry key="project.open.time.12" value="1" />
@@ -33,37 +32,64 @@
           <entry key="project.open.time.7" value="1" />
           <entry key="project.open.time.9" value="3" />
           <entry key="project.opened" value="13" />
+=======
+          <entry key="project.closed" value="5" />
+          <entry key="project.open.time.10" value="1" />
+          <entry key="project.open.time.12" value="1" />
+          <entry key="project.open.time.3" value="2" />
+          <entry key="project.open.time.6" value="1" />
+          <entry key="project.open.time.9" value="1" />
+          <entry key="project.opened" value="6" />
+>>>>>>> Stashed changes
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.edit">
         <counts>
+<<<<<<< Updated upstream
           <entry key="dummy" value="25" />
           <entry key="py" value="5549" />
+=======
+          <entry key="py" value="3664" />
+>>>>>>> Stashed changes
           <entry key="txt" value="64" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
+<<<<<<< Updated upstream
           <entry key="PLAIN_TEXT" value="89" />
           <entry key="Python" value="5549" />
+=======
+          <entry key="PLAIN_TEXT" value="64" />
+          <entry key="Python" value="3664" />
+>>>>>>> Stashed changes
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.open">
         <counts>
+<<<<<<< Updated upstream
           <entry key="py" value="80" />
+=======
+          <entry key="py" value="54" />
+>>>>>>> Stashed changes
           <entry key="txt" value="2" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.open">
         <counts>
           <entry key="PLAIN_TEXT" value="2" />
+<<<<<<< Updated upstream
           <entry key="Python" value="80" />
+=======
+          <entry key="Python" value="54" />
+>>>>>>> Stashed changes
         </counts>
       </usages-collector>
     </session>
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
+<<<<<<< Updated upstream
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/pacman-contest/myTeam-Kazi.py">
           <provider selected="true" editor-type-id="text-editor">
@@ -74,11 +100,22 @@
                 <element signature="e#2116#5386#0" />
                 <element signature="e#5433#14135#0" />
                 <element signature="e#14622#22202#0" />
+=======
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/pacman-contest/myTeam-Kazi1006.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="192">
+              <caret line="220" column="20" selection-start-line="220" selection-start-column="20" selection-end-line="220" selection-end-column="20" />
+              <folding>
+                <element signature="e#3646#3883#0" />
+                <marker date="1538883196659" expanded="true" signature="8789:8792" ph="..." />
+>>>>>>> Stashed changes
               </folding>
             </state>
           </provider>
         </entry>
       </file>
+<<<<<<< Updated upstream
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/pacman-contest/myTeam.py">
           <provider selected="true" editor-type-id="text-editor">
@@ -86,7 +123,50 @@
               <caret line="1173" lean-forward="true" selection-start-line="1173" selection-end-line="1173" />
               <folding>
                 <element signature="e#56900#64534#0" />
+=======
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/pacman-contest/myTeam-V1.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="-661">
+              <caret line="903" column="28" selection-start-line="903" selection-start-column="6" selection-end-line="903" selection-end-column="28" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/pacman-contest/game.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="117">
+              <caret line="637" selection-start-line="637" selection-end-line="637" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/pacman-contest/myTeam.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="16">
+              <caret line="1107" selection-start-line="1107" selection-end-line="1107" />
+              <folding>
+                <element signature="e#649#687#0" expanded="true" />
+                <element signature="e#48318#53729#0" />
+>>>>>>> Stashed changes
               </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+<<<<<<< Updated upstream
+        <entry file="file://$PROJECT_DIR$/pacman-contest/baselineTeam.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="-335">
+              <caret line="34" column="60" selection-start-line="34" selection-start-column="60" selection-end-line="34" selection-end-column="60" />
+=======
+        <entry file="file://$PROJECT_DIR$/pacman-contest/distanceCalculator.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="115">
+              <caret line="70" selection-start-line="70" selection-end-line="70" />
             </state>
           </provider>
         </entry>
@@ -94,8 +174,43 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/pacman-contest/baselineTeam.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-335">
-              <caret line="34" column="60" selection-start-line="34" selection-start-column="60" selection-end-line="34" selection-end-column="60" />
+            <state relative-caret-position="106">
+              <caret line="155" lean-forward="true" selection-start-line="155" selection-end-line="155" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/pacman-contest/myTeam-Kazi.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="281">
+              <caret line="311" column="29" lean-forward="true" selection-start-line="311" selection-start-column="29" selection-end-line="311" selection-end-column="29" />
+              <folding>
+                <element signature="e#1130#2038#0" />
+                <element signature="e#2116#5477#0" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/pacman-contest/myTeam-DG-RL.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="-85">
+              <caret line="279" column="23" selection-start-line="279" selection-start-column="16" selection-end-line="279" selection-end-column="23" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/pacman-contest/autorun.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="32">
+              <caret line="5" column="5" selection-start-line="5" selection-start-column="5" selection-end-line="5" selection-end-column="5" />
+              <folding>
+                <element signature="e#0#9#0" expanded="true" />
+              </folding>
+>>>>>>> Stashed changes
             </state>
           </provider>
         </entry>
@@ -104,6 +219,23 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
+<<<<<<< Updated upstream
+=======
+      <find>final(</find>
+      <find>replay</find>
+      <find>final</find>
+      <find>-q</find>
+      <find>isInvaderDead</find>
+      <find>getQValue</find>
+      <find>def getQValue</find>
+      <find>foodlist</find>
+      <find>ispacman</find>
+      <find>def computeActionFromQValues(self, gameState)</find>
+      <find>print self.</find>
+      <find>getInvaders</find>
+      <find>operator</find>
+      <find>getmissing</find>
+>>>>>>> Stashed changes
       <find>getMissingFoods</find>
       <find>getmissingFood</find>
       <find>getRewards</find>
@@ -116,6 +248,7 @@
       <find>scared</find>
       <find>print &quot;update</find>
       <find>OffensiveUCT</find>
+<<<<<<< Updated upstream
       <find>GTDefensiveReflexAgent</find>
       <find>closest</find>
       <find>self.draw</find>
@@ -134,6 +267,11 @@
       <find>debugdraw</find>
       <find>OffensiveQAgent</find>
       <find>isInvaderDead</find>
+=======
+      <find>self.carryLimit</find>
+      <find>closest</find>
+      <find>GTDefensiveReflexAgent</find>
+>>>>>>> Stashed changes
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -149,12 +287,20 @@
       <list>
         <option value="$PROJECT_DIR$/todo.txt" />
         <option value="$PROJECT_DIR$/pacman-contest/myTeam-V1.py" />
+<<<<<<< Updated upstream
         <option value="$PROJECT_DIR$/pacman-contest/myTeam-Kazi1006.py" />
         <option value="$PROJECT_DIR$/pacman-contest/autorun.py" />
         <option value="$PROJECT_DIR$/pacman-contest/myTeam-YK.py" />
         <option value="$PROJECT_DIR$/pacman-contest/baselineTeam.py" />
         <option value="$PROJECT_DIR$/pacman-contest/myTeam-Kazi.py" />
         <option value="$PROJECT_DIR$/pacman-contest/myTeam.py" />
+=======
+        <option value="$PROJECT_DIR$/pacman-contest/myTeam.py" />
+        <option value="$PROJECT_DIR$/pacman-contest/myTeam-Kazi.py" />
+        <option value="$PROJECT_DIR$/pacman-contest/autorun.py" />
+        <option value="$PROJECT_DIR$/pacman-contest/baselineTeam.py" />
+        <option value="$PROJECT_DIR$/pacman-contest/myTeam-Kazi1006.py" />
+>>>>>>> Stashed changes
       </list>
     </option>
   </component>
@@ -248,7 +394,11 @@
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/pacman-contest/capture.py" />
+<<<<<<< Updated upstream
       <option name="PARAMETERS" value="-r myTeam-Kazi -b baselineTeam -l mediumCapture" />
+=======
+      <option name="PARAMETERS" value="-r myTeam-Kazi1006 -b myTeam-V1 -l mediumCapture" />
+>>>>>>> Stashed changes
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
       <option name="MODULE_MODE" value="false" />
@@ -334,6 +484,7 @@
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
     </layout>
     <layout-to-restore>
+<<<<<<< Updated upstream
       <window_info content_ui="combo" id="Project" order="0" sideWeight="0.49723756" visible="true" weight="0.1893397" />
       <window_info id="Structure" order="1" sideWeight="0.50276244" side_tool="true" weight="0.24980111" />
       <window_info id="Favorites" order="2" side_tool="true" />
@@ -341,6 +492,15 @@
       <window_info anchor="bottom" id="Find" order="1" />
       <window_info anchor="bottom" id="Run" order="2" sideWeight="0.49960223" weight="0.26481482" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.2962963" />
+=======
+      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.49723756" visible="true" weight="0.20525059" />
+      <window_info id="Structure" order="1" sideWeight="0.50276244" side_tool="true" weight="0.24980111" />
+      <window_info id="Favorites" order="2" side_tool="true" />
+      <window_info anchor="bottom" id="Message" order="0" />
+      <window_info anchor="bottom" id="Find" order="1" weight="0.32962963" />
+      <window_info anchor="bottom" id="Run" order="2" sideWeight="0.49960223" weight="0.32962963" />
+      <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
+>>>>>>> Stashed changes
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" />
@@ -400,6 +560,7 @@
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+<<<<<<< Updated upstream
           <url>file://$PROJECT_DIR$/pacman-contest/myTeam-Kazi1006.py</url>
           <line>224</line>
           <option name="timeStamp" value="121" />
@@ -408,6 +569,11 @@
           <url>file://$PROJECT_DIR$/pacman-contest/myTeam-Kazi.py</url>
           <line>527</line>
           <option name="timeStamp" value="138" />
+=======
+          <url>file://$PROJECT_DIR$/pacman-contest/myTeam.py</url>
+          <line>1107</line>
+          <option name="timeStamp" value="69" />
+>>>>>>> Stashed changes
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
@@ -437,6 +603,7 @@
         </state>
       </provider>
     </entry>
+<<<<<<< Updated upstream
     <entry file="file://$PROJECT_DIR$/pacman-contest/game.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="117">
@@ -510,18 +677,58 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="154">
           <caret line="119" column="11" selection-start-line="119" selection-start-column="6" selection-end-line="119" selection-end-column="11" />
+=======
+    <entry file="file://$PROJECT_DIR$/pacman-contest/capture.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="91">
+          <caret line="865" selection-start-line="865" selection-end-line="865" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/pacman-contest/myTeam-YK.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-16">
+          <caret line="337" selection-start-line="337" selection-end-line="337" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/pacman-contest/autorun.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="32">
+          <caret line="5" column="5" selection-start-line="5" selection-start-column="5" selection-end-line="5" selection-end-column="5" />
+          <folding>
+            <element signature="e#0#9#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/pacman-contest/myTeam-Kazi.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="281">
+          <caret line="311" column="29" lean-forward="true" selection-start-line="311" selection-start-column="29" selection-end-line="311" selection-end-column="29" />
+          <folding>
+            <element signature="e#1130#2038#0" />
+            <element signature="e#2116#5477#0" />
+          </folding>
+>>>>>>> Stashed changes
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/pacman-contest/myTeam-DG-RL.py">
       <provider selected="true" editor-type-id="text-editor">
+<<<<<<< Updated upstream
         <state relative-caret-position="289">
           <caret line="466" column="24" lean-forward="true" selection-start-line="453" selection-start-column="4" selection-end-line="466" selection-end-column="24" />
+=======
+        <state relative-caret-position="-85">
+          <caret line="279" column="23" selection-start-line="279" selection-start-column="16" selection-end-line="279" selection-end-column="23" />
+>>>>>>> Stashed changes
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/pacman-contest/baselineTeam.py">
       <provider selected="true" editor-type-id="text-editor">
+<<<<<<< Updated upstream
         <state relative-caret-position="-335">
           <caret line="34" column="60" selection-start-line="34" selection-start-column="60" selection-end-line="34" selection-end-column="60" />
         </state>
@@ -536,16 +743,61 @@
             <element signature="e#2116#5386#0" />
             <element signature="e#5433#14135#0" />
             <element signature="e#14622#22202#0" />
+=======
+        <state relative-caret-position="106">
+          <caret line="155" lean-forward="true" selection-start-line="155" selection-end-line="155" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/pacman-contest/myTeam.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="16">
+          <caret line="1107" selection-start-line="1107" selection-end-line="1107" />
+          <folding>
+            <element signature="e#649#687#0" expanded="true" />
+            <element signature="e#48318#53729#0" />
+>>>>>>> Stashed changes
           </folding>
         </state>
       </provider>
     </entry>
+<<<<<<< Updated upstream
     <entry file="file://$PROJECT_DIR$/pacman-contest/myTeam.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-4031">
           <caret line="1173" lean-forward="true" selection-start-line="1173" selection-end-line="1173" />
           <folding>
             <element signature="e#56900#64534#0" />
+=======
+    <entry file="file://$PROJECT_DIR$/pacman-contest/game.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="117">
+          <caret line="637" selection-start-line="637" selection-end-line="637" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/pacman-contest/distanceCalculator.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="115">
+          <caret line="70" selection-start-line="70" selection-end-line="70" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/pacman-contest/myTeam-V1.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-661">
+          <caret line="903" column="28" selection-start-line="903" selection-start-column="6" selection-end-line="903" selection-end-column="28" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/pacman-contest/myTeam-Kazi1006.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="192">
+          <caret line="220" column="20" selection-start-line="220" selection-start-column="20" selection-end-line="220" selection-end-column="20" />
+          <folding>
+            <element signature="e#3646#3883#0" />
+            <marker date="1538883196659" expanded="true" signature="8789:8792" ph="..." />
+>>>>>>> Stashed changes
           </folding>
         </state>
       </provider>
