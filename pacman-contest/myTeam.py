@@ -1472,7 +1472,7 @@ class OffensiveQAgent(ApproximateQAgent):
 
         for chaser in chasers:
             for posX in range(int(max(1, chaser[0] - X)), int(min(width, chaser[0] + X))):
-                for posY in range(int(max(0, chaser[0] - Y)), int(min(height, chaser[0] + Y))):
+                for posY in range(int(max(0, chaser[1] - Y)), int(min(height, chaser[1] + Y))):
                     if not (gameState.hasWall(posX, posY) or ((abs(posX - chaser[0]) + abs(posY - chaser[1]))) <= 4):
                         avoidPos.append((posX, posY))
         ##Here return a list and the position
