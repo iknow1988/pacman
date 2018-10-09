@@ -586,10 +586,17 @@ def EscapePath(gmagent, gameState, returngoalPosition=False):
     return []
 
 
+
 def FindAlternativeFood(gmagent, gameState, returngoalPosition=True):
     myPos = gmagent.getCurrentObservation().getAgentPosition(gmagent.index)
     enemies = [gameState.getAgentState(i) for i in gmagent.getOpponents(gameState)]
-    chasers = [a.getPosition() for a in enemies if not a.isPacman and a.getPosition() != None]
+    chasers=[]
+    for a in enemies:
+        if not a.isPacman:
+            if a.getPosition()!=None:
+                chasers.append(a.getPosition())
+    
+    #chasers = [a.getPosition() for a in enemies if  (not a.isPacman) and a.getPosition() != None]
     walls = gameState.getWalls()
     
     foodList = gmagent.getFood(gameState).asList()    
@@ -610,18 +617,24 @@ def FindAlternativeFood(gmagent, gameState, returngoalPosition=True):
     
     for chaser in chasers:
         for posX in range(int(max(1,chaser[0]-X)), int(min(width,chaser[0]+X))):
-            for posY in range(int(max(0,chaser[0]-Y)), int(min(height,chaser[0]+Y))):
-                if not (gameState.hasWall(posX, posY) or ((abs(posX-chaser[0])+abs(posY-chaser[1])))<=4):
-                    avoidPos.append((posX, posY))
+            for posY in range(int(max(0,chaser[1]-Y)), int(min(height,chaser[1]+Y))):
+                if not gameState.hasWall(posX, posY):
+                    if (abs(posX-chaser[0])+abs(posY-chaser[1]))<=3:
+                        avoidPos.append((posX, posY))
+                    if (posX, posY) in goalPositions:
+                        goalPositions.remove((posX,posY))
+                        
     ##Here return a list and the position 
-    currentPath, currentPosition=aStarSearch(gmagent, gameState, goalPositions=goalPositions, startPosition=myPos, avoidPositions=avoidPos, returngoalPosition=returngoalPosition)
+    currentPath, currentPosition=aStarSearch(gmagent, gameState, goalPositions=goalPositions, startPosition=myPos,
+                                             avoidPositions=avoidPos, returngoalPosition=True)
+
     steps=min(5, len(currentPath))
     stackpath=[]
     if steps>0:
         for i in range(steps-1,-1,-1):
             stackpath.append(currentPath[i])
     return stackpath, currentPosition
-     
+       
  
 def CloggingOpponent(gmagent, gameState, returngoalPosition = False):
     """
