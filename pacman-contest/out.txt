@@ -1,0 +1,178 @@
+Starting training!! [All layouts and 2 episodes
+
+Red team myTeam-DG-RL with {}:
+myTeam-DG-RL.py
+Loading Team: myTeam-DG-RL.py
+Arguments: {}
+
+Blue team baselineTeam with {}:
+baselineTeam.py
+Loading Team: baselineTeam.py
+Arguments: {}
+1
+1
+1
+Red team starts
+Time is up.
+The Red team wins by 3 points.
+Red team starts
+The Blue team has returned at least 28 of the opponents' dots.
+Blue team starts
+Time is up.
+The Red team wins by 3 points.
+Average Score: -7.33333333333
+Scores:        3, -28, 3
+Red Win Rate:  2/3 (0.67)
+Blue Win Rate: 1/3 (0.33)
+Record:        Red, Blue, Red
+Episode 1 - RANDOM1 ... done!
+
+Red team myTeam-DG-RL with {}:
+myTeam-DG-RL.py
+Loading Team: myTeam-DG-RL.py
+Arguments: {}
+
+Blue team baselineTeam with {}:
+baselineTeam.py
+Loading Team: baselineTeam.py
+Arguments: {}
+1
+1
+1
+Red team starts
+Time is up.
+The Red team wins by 2 points.
+Red team starts
+Time is up.
+Tie game!
+Blue team starts
+Time is up.
+Tie game!
+Average Score: 0.666666666667
+Scores:        2, 0, 0
+Red Win Rate:  1/3 (0.33)
+Blue Win Rate: 0/3 (0.00)
+Record:        Red, Tie, Tie
+Episode 2 - RANDOM2 ... done!
+
+Red team baselineTeam with {}:
+baselineTeam.py
+Loading Team: baselineTeam.py
+Arguments: {}
+
+Blue team myTeam-DG-RL with {}:
+myTeam-DG-RL.py
+Loading Team: myTeam-DG-RL.py
+Arguments: {}
+Blue team starts
+Episode 3 - ./layouts/alleyCapture.lay ... done!
+
+Red team baselineTeam with {}:
+baselineTeam.py
+Loading Team: baselineTeam.py
+Arguments: {}
+
+Blue team myTeam-DG-RL with {}:
+myTeam-DG-RL.py
+Loading Team: myTeam-DG-RL.py
+Arguments: {}
+Blue team starts
+Episode 4 - ./layouts/bloxCapture.lay ... done!
+
+Red team baselineTeam with {}:
+baselineTeam.py
+Loading Team: baselineTeam.py
+Arguments: {}
+
+Blue team myTeam-DG-RL with {}:
+myTeam-DG-RL.py
+Loading Team: myTeam-DG-RL.py
+Arguments: {}
+Blue team starts
+Episode 5 - ./layouts/crowdedCapture.lay ... done!
+
+Red team baselineTeam with {}:
+baselineTeam.py
+Loading Team: baselineTeam.py
+Arguments: {}
+
+Blue team myTeam-DG-RL with {}:
+myTeam-DG-RL.py
+Episode 6 - ./layouts/defaultCapture.lay ... done!
+
+Red team baselineTeam with {}:
+baselineTeam.py
+Loading Team: baselineTeam.py
+Arguments: {}
+
+Blue team myTeam-DG-RL with {}:
+myTeam-DG-RL.py
+Episode 7 - ./layouts/distantCapture.lay ... done!
+
+Red team baselineTeam with {}:
+baselineTeam.py
+Loading Team: baselineTeam.py
+Arguments: {}
+
+Blue team myTeam-DG-RL with {}:
+myTeam-DG-RL.py
+Episode 8 - ./layouts/fastCapture.lay ... done!
+
+Red team baselineTeam with {}:
+baselineTeam.py
+Loading Team: baselineTeam.py
+Arguments: {}
+
+Blue team myTeam-DG-RL with {}:
+myTeam-DG-RL.py
+Loading Team: myTeam-DG-RL.py
+Arguments: {}
+Blue team starts
+Episode 9 - ./layouts/jumboCapture.lay ... done!
+
+Red team baselineTeam with {}:
+baselineTeam.py
+Loading Team: baselineTeam.py
+Arguments: {}
+
+Blue team myTeam-DG-RL with {}:
+myTeam-DG-RL.py
+Episode 10 - ./layouts/mediumCapture.lay ... done!
+
+Red team baselineTeam with {}:
+baselineTeam.py
+Loading Team: baselineTeam.py
+Arguments: {}
+
+Blue team myTeam-DG-RL with {}:
+myTeam-DG-RL.py
+Episode 11 - ./layouts/officeCapture.lay ... done!
+
+Red team baselineTeam with {}:
+baselineTeam.py
+Loading Team: baselineTeam.py
+Arguments: {}
+
+Blue team myTeam-DG-RL with {}:
+myTeam-DG-RL.py
+Episode 12 - ./layouts/strategicCapture.lay ... done!
+
+Red team baselineTeam with {}:
+baselineTeam.py
+Loading Team: baselineTeam.py
+Arguments: {}
+
+Blue team myTeam-DG-RL with {}:
+myTeam-DG-RL.py
+Episode 13 - ./layouts/testCapture.lay ... done!
+
+Red team baselineTeam with {}:
+baselineTeam.py
+Loading Team: baselineTeam.py
+Arguments: {}
+
+Blue team myTeam-DG-RL with {}:
+myTeam-DG-RL.py
+Loading Team: myTeam-DG-RL.py
+Arguments: {}
+Episode 14 - ./layouts/tinyCapture.lay ... done!
