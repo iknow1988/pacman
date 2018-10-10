@@ -693,7 +693,33 @@ def CheckIfAgentStucking(gmagent, gameState, referhistory=10, countingfactor=3):
     return countingfactor<0
 
 
-
+def RunForestCheckDeadAlley(gmagent, gameState, action):
+    """
+    Call this function when you are in urgent running ignoring foods
+    RETURN: True when this direction is dangerous
+    """
+    walls = gameState.getWalls()
+    width = walls.width
+    height = walls.height
+    walls = walls.asList()
+    startPosition=gmagent.getCurrentObservation().getAgentPosition(gmagent.index)
+    avoidPos=[startPosition]
+    
+    half_position=(int(gameState.data.layout.width/2-gmagent.red),int(gameState.data.layout.height/2))
+    while(gameState.hasWall(half_position[0],half_position[1])):
+        half_position=(half_position[0],half_position[1]-1) 
+        
+    goalPositions = [(half_position[0], height_position) for height_position in range(3, height-1) if not gameState.hasWall(half_position[0], height_position)]
+    
+    successor = gmagent.getSuccessor(gameState, action)
+        
+    myState = successor.getAgentState(gmagent.index)
+    successorPos = myState.getPosition()
+    Path, Position, Cost =aStarSearch(gmagent, gameState, goalPositions, startPosition=successorPos, avoidPositions=avoidPos, returngoalPosition=False, returnCost= True)
+    if Cost > width * height:
+        return True
+    #width * height
+    return False
 
 
 
