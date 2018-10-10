@@ -1343,11 +1343,11 @@ class OffensiveQAgent(ApproximateQAgent):
         #     'distanceToInvader': 0.015331274121942063
         # })
         self.weights = util.Counter({
-            'distanceToGhost': -0.09789200941236537,
-            'bias': -4.218878193773446,
-            'numOfGhosts': 0.3426987251631774,
+            'distanceToGhost': -0.7488480965816826,
+            'bias': -2.5703680099396724,
+            'numOfGhosts': 0.05322959640985453,
             'successorScore': 0.9169816334644033,
-            'targetPosition': -8.6353361911183,
+            'targetPosition': -8.768669849614495,
             'distanceToInvader': 0.4645185484656794
         })
         self.freeTimerToEatFood = 3
@@ -1572,13 +1572,13 @@ class DefensiveQAgent(ApproximateQAgent):
         #     'invaderDistance': -27.497792993317265
         # })
         self.weights = util.Counter({
-            'bias': -4.586074248564161,
-            'missingFoodDistance': -15.81901072573371,
-            'distanceToEntrance': -10.971157338028735,
+            'bias': -5.423708441572619,
+            'missingFoodDistance': -16.364344164244894,
+            'distanceToEntrance': -11.179064509728025,
             'scaredState': 1.0681305090282578,
             'isPacman': 4.874879766979384,
-            'numOfInvaders': 1.2587071647319488,
-            'invaderDistance': -27.295889489781025
+            'numOfInvaders': 0.8040635735423013,
+            'invaderDistance': -27.198030068319607
         })
 
     def registerInitialState(self, gameState):
