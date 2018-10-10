@@ -1683,7 +1683,7 @@ class DefensiveQAgent(ApproximateQAgent):
         features["bias"] = 1.0
         features['numOfInvaders'] = len(invaders)
 
-        self.debugDraw(self.target_position, (0, 1, 0), clear=True)
+        # self.debugDraw(self.target_position, (0, 1, 0), clear=True)
 
         return features
 
