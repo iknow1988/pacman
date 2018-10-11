@@ -1436,7 +1436,7 @@ class OffensiveQAgent(ApproximateQAgent):
             distancesToInvaders = [self.getMazeDistance(myNextPosition, a.getPosition()) for a in invaders]
             if min(distancesToInvaders) <= 1 and not myNextState.isPacman:
                 minDistanceToInvader = -min(distancesToInvaders) * 1.0
-            if min(distancesToInvaders) > 5:
+            if min(distancesToInvaders) > 5 and len(foodList) > 0:
                 self.target_position = min(foodList, key=lambda x: self.getMazeDistance(myNextPosition, x))
 
         # eaten a food, giving another food to eat
