@@ -1625,7 +1625,7 @@ class DefensiveQAgent(ApproximateQAgent):
             'bias': -5.423708441572619,
             'missingFoodDistance': -16.364344164244894,
             'distanceToEntrance': -11.179064509728025,
-            'scaredState': 1.0681305090282578,
+            'scaredState': 3.4064141580923644,
             'isPacman': 4.874879766979384,
             'numOfInvaders': 0.8040635735423013,
             'invaderDistance': -27.198030068319607
