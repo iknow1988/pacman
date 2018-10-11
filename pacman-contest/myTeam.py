@@ -1317,6 +1317,45 @@ class ApproximateQAgent(CaptureAgent):
                 stackpath.append(currentPath[i])
         return stackpath, currentPosition
 
+    def getSafeActions(self, gameState, actions):
+        safeActions = []
+        for action in actions:
+            if not self.RunForestCheckDeadAlley(gameState, action):
+                safeActions.append(action)
+
+        return safeActions
+
+    def RunForestCheckDeadAlley(self, gameState, action):
+        """
+        Call this function when you are in urgent running ignoring foods
+        RETURN: True when this direction is dangerous
+        """
+        gmagent = self
+        walls = gameState.getWalls()
+        width = walls.width
+        height = walls.height
+        walls = walls.asList()
+        startPosition = gmagent.getCurrentObservation().getAgentPosition(gmagent.index)
+        avoidPos = [startPosition]
+
+        half_position = (int(gameState.data.layout.width / 2 - gmagent.red), int(gameState.data.layout.height / 2))
+        while (gameState.hasWall(half_position[0], half_position[1])):
+            half_position = (half_position[0], half_position[1] - 1)
+
+        goalPositions = [(half_position[0], height_position) for height_position in range(3, height - 1) if
+                         not gameState.hasWall(half_position[0], height_position)]
+
+        successor = gmagent.getSuccessor(gameState, action)
+
+        myState = successor.getAgentState(gmagent.index)
+        successorPos = myState.getPosition()
+        Path, Position, Cost = self.aStarSearch(gameState, goalPositions, startPosition=successorPos,
+                                           avoidPositions=avoidPos, returngoalPosition=False, returnCost=True)
+        if Cost > width * height:
+            return True
+        # width * height
+        return False
+
 
 class OffensiveQAgent(ApproximateQAgent):
 
@@ -1397,6 +1436,8 @@ class OffensiveQAgent(ApproximateQAgent):
             distancesToInvaders = [self.getMazeDistance(myNextPosition, a.getPosition()) for a in invaders]
             if min(distancesToInvaders) <= 1 and not myNextState.isPacman:
                 minDistanceToInvader = -min(distancesToInvaders) * 1.0
+            if min(distancesToInvaders) > 5:
+                self.target_position = min(foodList, key=lambda x: self.getMazeDistance(myNextPosition, x))
 
         # eaten a food, giving another food to eat
         if myCurrentPosition == self.target_position:
@@ -1520,6 +1561,15 @@ class OffensiveQAgent(ApproximateQAgent):
     def computeActionFromQValues(self, gameState):
         actions = gameState.getLegalActions(self.index)
         actions.remove('Stop')
+        ghosts = self.getGhosts(gameState)
+        myCurrentState = gameState.getAgentState(self.index)
+        myCurrentPosition = myCurrentState.getPosition()
+        if len(ghosts) > 0:
+            distancesToGhosts = [self.getMazeDistance(myCurrentPosition, a.getPosition()) for a in ghosts]
+            if not self.isOpponentScared(gameState) and min(distancesToGhosts) <= 5 and myCurrentState.isPacman:
+                if len(actions) > 0:
+                    actions = self.getSafeActions(gameState, actions)
+
         values = [self.getQValue(gameState, a) for a in actions]
         maxValue = max(values)
         bestActions = [a for a, v in zip(actions, values) if v == maxValue]
@@ -1753,6 +1803,14 @@ class DefensiveQAgent(ApproximateQAgent):
         # return 'Stop'
         actions = gameState.getLegalActions(self.index)
         actions.remove('Stop')
+        ghosts = self.getGhosts(gameState)
+        myCurrentState = gameState.getAgentState(self.index)
+        myCurrentPosition = myCurrentState.getPosition()
+        if myCurrentState.isPacman and len(ghosts) > 0:
+            distancesToGhosts = [self.getMazeDistance(myCurrentPosition, a.getPosition()) for a in ghosts]
+            if not self.isOpponentScared(gameState) and min(distancesToGhosts) <= 5 and myCurrentState.isPacman:
+                if len(actions) > 0:
+                    actions = self.getSafeActions(gameState, actions)
         values = [self.getQValue(gameState, a) for a in actions]
 
         maxValue = max(values)
@@ -1816,3 +1874,13 @@ class DefensiveQAgent(ApproximateQAgent):
             return True
 
         return False
+
+    def isOpponentScared(self, state):
+        scared = False
+        enemies = [state.getAgentState(i) for i in self.getOpponents(state)]
+        for a in enemies:
+            if not a.isPacman:
+                if a.scaredTimer > 3:
+                    scared = True
+                    break
+        return scared
