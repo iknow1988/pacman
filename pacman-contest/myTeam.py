@@ -1071,7 +1071,6 @@ def getMissingFood(gmagent, gameState, steps=3):
 
     return ret_list
 
-
 def CapsuleMonitor(gmagent, gameState, scare, last=40):
     #print("In CapsuleMonitor")
     if scare == 0:
@@ -1090,7 +1089,6 @@ def CapsuleMonitor(gmagent, gameState, scare, last=40):
             return 0
     return scare
 
-
 def keyPositions(gmagent, gameState):
     #curfood=gmagent.getFoodYouAreDefending(gmagent.observationHistory[0]).asList()
     half_position=(int(gameState.data.layout.width/2-gmagent.red),int(gameState.data.layout.height/2))
@@ -1107,6 +1105,9 @@ def keyPositions(gmagent, gameState):
     while(gameState.hasWall(ThirdquaterPosition[0],ThirdquaterPosition[1])):
         ThirdquaterPosition=(ThirdquaterPosition[0],ThirdquaterPosition[1]-1)
     return [half_position, FirstquaterPosition, ThirdquaterPosition]
+
+
+# ================APPROXIMATE Q AGENT=================== #
 
 
 class ApproximateQAgent(CaptureAgent):
