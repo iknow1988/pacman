@@ -671,32 +671,52 @@ def CloggingOpponent(gmagent, gameState, returngoalPosition = False):
     
     if len(chaser)>0:
         startPosition=chaser[0]
-        last_seen_opponent=startPosition
         
     Path, Position, Cost =aStarSearch(gmagent, gameState, goalPositions, startPosition=startPosition, avoidPositions=avoidPositions, returngoalPosition=False, returnCost= True)
     
     if len(chaser)>1:
         Path2, Position2, Cost2 =aStarSearch(gmagent, gameState, goalPositions, startPosition=chaser[1], avoidPositions=avoidPositions, returngoalPosition=False, returnCost= True)
         if Cost2>Cost:
-            last_seen_opponent=chaser[1]
             Cost=Cost2
     
-    if Cost > width * height:
+    if Cost > width * height and len(chaser)>0:
         return True
     
-    ####NEW NEED TESTING
     #width * height
-    if len(gmagent.observationHistory)>=2:
-        myPreState = gmagent.observationHistory[-2]
-        myPrePos = gmagent.getPreviousObservation().getAgentPosition(gmagent.index)
+    if (len(gmagent.observationHistory)>=10):
+        index_state=-2
+        myPreState = gmagent.observationHistory[index_state]
+        myPrePos = myPreState.getAgentPosition(gmagent.index)
+        if (myPrePos!=myPos):
+            return False
+        while(myPrePos==myPos):
+            index_state-=1
+            myPreState = gmagent.observationHistory[index_state]
+            myPrePos = myPreState.getAgentPosition(gmagent.index)
+               
+        index_state+=1
+        myPreState = gmagent.observationHistory[index_state]
+        myPrePos = myPreState.getAgentPosition(gmagent.index)
         
-        if myPrePos==myPos:
+        Preenemies = [myPreState.getAgentState(i) for i in gmagent.getOpponents(myPreState)]
+        Prechaser = [a.getPosition() for a in Preenemies if a.isPacman and a.getPosition() != None]
+        
+        #print("NOW===",myPrePos==myPos, myPrePos, myPos, index_state, len(Prechaser))
+        while(index_state!=-2):
+            myPreState = gmagent.observationHistory[index_state]
+            myPrePos = myPreState.getAgentPosition(gmagent.index)
             Preenemies = [myPreState.getAgentState(i) for i in gmagent.getOpponents(myPreState)]
-            chaser = [a.getPosition() for a in Preenemies if a.isPacman and a.getPosition() != None]
-            if len(chaser) == 0:
-                Dist1=gmagent.getMazeDistance(myPrePos,last_seen_opponent)
-                if Dist1>=3: return True
-    ####END NEW NEED TESTING      
+            Prechaser = [a.getPosition() for a in Preenemies if a.isPacman and a.getPosition() != None]
+            if len(Prechaser) == 0:
+                break
+            index_state += 1
+        index_state -= 1
+        myPreState = gmagent.observationHistory[index_state]
+        myPrePos = myPreState.getAgentPosition(gmagent.index)
+        #print("AFTER===",myPrePos==myPos, myPrePos, myPos, index_state, len(Prechaser))
+        Preenemies = [myPreState.getAgentState(i) for i in gmagent.getOpponents(myPreState)]
+        Prechaser = [a.getPosition() for a in Preenemies if a.isPacman and a.getPosition() != None]
+        if len(Prechaser)>0 and gmagent.getMazeDistance(myPrePos,Prechaser[0])>3: return True
     
     return False
 
