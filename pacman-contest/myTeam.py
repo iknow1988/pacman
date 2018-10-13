@@ -1726,6 +1726,10 @@ class DefensiveQAgent(ApproximateQAgent):
                 for pos, i in missingFoods:
                     dist_miss += self.getMazeDistance(pos, newPos)
 
+        # reached carry limit go back to home
+        if myCurrentState.numCarrying >= self.carryLimit:
+            self.target_position = min(self.entrances, key=lambda x: self.getMazeDistance(myPosition, x))
+
         features['invaderDistance'] = minDistanceToInvader
         features["isPacman"] = minDistanceToGhost
         features['missingFoodDistance'] = dist_miss * 1.0 / self.gridSize
