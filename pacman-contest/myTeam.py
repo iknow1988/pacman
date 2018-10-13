@@ -988,7 +988,11 @@ def kmeans(myFood, parameter=6):
     height=myFood.height
     foodlist=[(i,j) for i in range(width) for j in range(height) if myFood[i][j]==True]
     k=max(1,len(foodlist)/parameter)
-
+    
+    ##fix 1013
+    new_centers=[]
+    centers=[]
+    
     if len(foodlist)>0:
         centers_=random.sample(foodlist,k)
         centers=[(i,1) for i in centers_]
@@ -996,7 +1000,7 @@ def kmeans(myFood, parameter=6):
         while(1 or flag>20):
             flag+=1
             new_clusters=[[i[0]] for i in centers]
-            new_centers=[]
+            
 
             for i in foodlist:
                 distance=distanceCalculator.manhattanDistance(i,centers[0][0])
