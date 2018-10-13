@@ -1485,7 +1485,6 @@ class OffensiveQAgent(ApproximateQAgent):
 
         if not self.isOpponentScared(state) and self.LoopBreakerMoniter(state):
             self.target_position = min(self.entrances, key=lambda x: self.getMazeDistance(myNextPosition, x))
-            print "***************** LOOOP BREAK********************"
 
         features["bias"] = 1.0
         features['numOfGhosts'] = len(ghosts)
@@ -1493,8 +1492,7 @@ class OffensiveQAgent(ApproximateQAgent):
         features['distanceToInvader'] = minDistanceToInvader
         features['targetPosition'] = self.getMazeDistance(myNextPosition, self.target_position) * 1.0 / self.gridSize
 
-        self.debugDraw(self.target_position, (1, 0, 0), clear=True)
-        # self.debugDraw(self.minDistantEntrance, (1, 0, 0), clear=True)
+        # self.debugDraw(self.target_position, (1, 0, 0), clear=True)
 
         return features
 
@@ -1728,7 +1726,6 @@ class DefensiveQAgent(ApproximateQAgent):
                     and len(foodListDefending) > 5 and len(foodListToEat) > 2 \
                     and len(foodListToEat) > len(foodListDefending):
                 self.target_position = min(foodListToEat, key=lambda x: self.getMazeDistance(newPos, x))
-                print "ATTACK", self.target_position
             else:
                 if len(foodListDefending) > 5:
                     entrances = self.entrances
@@ -1813,7 +1810,7 @@ class DefensiveQAgent(ApproximateQAgent):
         features["bias"] = 1.0
         features['numOfInvaders'] = len(invaders)
 
-        self.debugDraw(self.target_position, (1, 1, 1), clear=True)
+        # self.debugDraw(self.target_position, (1, 1, 1), clear=True)
 
         return features
 
