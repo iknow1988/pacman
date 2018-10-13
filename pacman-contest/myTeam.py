@@ -1800,6 +1800,10 @@ class DefensiveQAgent(ApproximateQAgent):
         if newState.isPacman and (timeLeft - dist < 1.0):
             self.target_position = target
 
+        # eaten everything go back home
+        if len(foodListToEat) == 2:
+            self.target_position = min(self.entrances, key=lambda x: self.getMazeDistance(newPos, x))
+
         features['invaderDistance'] = minDistanceToInvader
         features["isPacman"] = minDistanceToGhost
         features['missingFoodDistance'] = dist_miss * 1.0 / self.gridSize
@@ -1808,7 +1812,7 @@ class DefensiveQAgent(ApproximateQAgent):
         features["bias"] = 1.0
         features['numOfInvaders'] = len(invaders)
 
-        # self.debugDraw(self.target_position, (1, 1, 1), clear=True)
+        self.debugDraw(self.target_position, (1, 1, 1), clear=True)
 
         return features
 
