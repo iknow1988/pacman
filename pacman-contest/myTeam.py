@@ -1361,6 +1361,16 @@ class ApproximateQAgent(CaptureAgent):
         # width * height
         return False
 
+    def isOpponentScared(self, state):
+        scared = False
+        enemies = [state.getAgentState(i) for i in self.getOpponents(state)]
+        for a in enemies:
+            if not a.isPacman:
+                if a.scaredTimer > 5:
+                    scared = True
+                    break
+        return scared
+
 
 class OffensiveQAgent(ApproximateQAgent):
 
@@ -1541,16 +1551,6 @@ class OffensiveQAgent(ApproximateQAgent):
 
         return CaptureAgent.observationFunction(self, state)
 
-    def isOpponentScared(self, state):
-        scared = False
-        enemies = [state.getAgentState(i) for i in self.getOpponents(state)]
-        for a in enemies:
-            if not a.isPacman:
-                if a.scaredTimer > self.freeTimerToEatFood:
-                    scared = True
-                    break
-        return scared
-
     def getRewards(self, state, lastState):
         reward = 0
         myPosition = state.getAgentState(self.index).getPosition()
@@ -1723,12 +1723,12 @@ class DefensiveQAgent(ApproximateQAgent):
             if newState.isPacman and len(foodListToEat) > 2 and \
                     (self.isOpponentScared(state) or myCurrentState.numCarrying < self.carryLimit):
                 self.target_position = min(foodListToEat, key=lambda x: self.getMazeDistance(newPos, x))
-            if (self.getScore(state) < 5 or newState.scaredTimer > 0) \
-                    and len(foodListDefending) > 5 and len(foodListToEat) > 2 \
+            if (self.getScore(state) < 6 or newState.scaredTimer > 0) \
+                    and len(foodListDefending) > 6 and len(foodListToEat) > 2 \
                     and len(foodListToEat) > len(foodListDefending):
                 self.target_position = min(foodListToEat, key=lambda x: self.getMazeDistance(newPos, x))
             else:
-                if len(foodListDefending) > 5:
+                if len(foodListDefending) > 6:
                     entrances = self.entrances
                     distances = []
                     for entrance in entrances:
@@ -1739,7 +1739,7 @@ class DefensiveQAgent(ApproximateQAgent):
                     minValue = min(distances)
                     bestLocations = [a for a, v in zip(entrances, distances) if v == minValue]
                     self.target_position = random.choice(bestLocations)
-                elif len(foodListDefending) > 0:
+                elif 0 < len(foodListDefending) <= 6:
                     successor_food_clusters = self.kmeans(self.getFoodYouAreDefending(state), 2)
                     best_food_cluster = max(successor_food_clusters,
                                             key=lambda item: item[1])[0]
@@ -1811,11 +1811,10 @@ class DefensiveQAgent(ApproximateQAgent):
         features["bias"] = 1.0
         features['numOfInvaders'] = len(invaders)
 
-        # self.debugDraw(self.target_position, (1, 1, 1), clear=True)
-
         return features
 
     def observationFunction(self, state):
+        # self.debugDraw(self.target_position, (1, 1, 1), clear=True)
         if self.lastState:
             distancePosition = self.getMazeDistance(state.getAgentState(self.index).getPosition(),
                                                     self.lastState.getAgentState(self.index).getPosition())
@@ -1996,16 +1995,6 @@ class DefensiveQAgent(ApproximateQAgent):
             if len(Prechaser) > 0 and gmagent.getMazeDistance(myPrePos, Prechaser[0]) > 3: return True
 
         return False
-
-    def isOpponentScared(self, state):
-        scared = False
-        enemies = [state.getAgentState(i) for i in self.getOpponents(state)]
-        for a in enemies:
-            if not a.isPacman:
-                if a.scaredTimer > 3:
-                    scared = True
-                    break
-        return scared
 
     def kmeans(self, myFood, parameter=6):
         width = myFood.width
