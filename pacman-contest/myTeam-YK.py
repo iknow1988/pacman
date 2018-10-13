@@ -638,6 +638,7 @@ def FindAlternativeFood(gmagent, gameState, returngoalPosition=True):
  
 last_seen_opponent=None
 
+
 def CloggingOpponent(gmagent, gameState, returngoalPosition = False):
     """
     CLOGGING NOT EATING OPPONENTS!!!
@@ -682,6 +683,7 @@ def CloggingOpponent(gmagent, gameState, returngoalPosition = False):
     if Cost > width * height and len(chaser)>0:
         return True
     
+    ####NEW NEED TESTING
     #width * height
     if (len(gmagent.observationHistory)>=10):
         index_state=-2
@@ -698,14 +700,25 @@ def CloggingOpponent(gmagent, gameState, returngoalPosition = False):
         myPreState = gmagent.observationHistory[index_state]
         myPrePos = myPreState.getAgentPosition(gmagent.index)
         
-        Preenemies = [myPreState.getAgentState(i) for i in gmagent.getOpponents(myPreState)]
-        Prechaser = [a.getPosition() for a in Preenemies if a.isPacman and a.getPosition() != None]
+        Preenemies = [(myPreState.getAgentState(i),i) for i in gmagent.getOpponents(myPreState)]
+        Prechaser = [(a.getPosition(), i) for a,i in Preenemies if a.isPacman and a.getPosition() != None]
+        goalPositions = [(half_position[0], height_position) for height_position in range(3, height-1) if not gameState.hasWall(half_position[0], height_position)]
+        avoidPositions=[myPos]
+        
+        startPosition=None
+        index_clog=0
+        for a,i in Prechaser:
+            Path, Position, Cost =aStarSearch(gmagent, gameState, goalPositions, startPosition=startPosition, avoidPositions=avoidPositions, returngoalPosition=False, returnCost= True)
+            if Cost > width * height:
+                index_clog = i
+                break
+
         
         #print("NOW===",myPrePos==myPos, myPrePos, myPos, index_state, len(Prechaser))
         while(index_state!=-2):
             myPreState = gmagent.observationHistory[index_state]
             myPrePos = myPreState.getAgentPosition(gmagent.index)
-            Preenemies = [myPreState.getAgentState(i) for i in gmagent.getOpponents(myPreState)]
+            Preenemies = [myPreState.getAgentState(i) for i in gmagent.getOpponents(myPreState) if i == index_clog]
             Prechaser = [a.getPosition() for a in Preenemies if a.isPacman and a.getPosition() != None]
             if len(Prechaser) == 0:
                 break
@@ -718,6 +731,7 @@ def CloggingOpponent(gmagent, gameState, returngoalPosition = False):
         Prechaser = [a.getPosition() for a in Preenemies if a.isPacman and a.getPosition() != None]
         if len(Prechaser)>0 and gmagent.getMazeDistance(myPrePos,Prechaser[0])>3: return True
     
+
     return False
 
 def CheckIfAgentStucking(gmagent, gameState, referhistory=10, countingfactor=3):
