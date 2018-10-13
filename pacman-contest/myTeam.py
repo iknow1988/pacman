@@ -1605,7 +1605,7 @@ class OffensiveQAgent(ApproximateQAgent):
 
         return best
 
-    def LoopBreakerMoniter(self, gameState, referhistory=12):
+    def LoopBreakerMoniter(self, gameState, referhistory=24):
         gmagent = self
         if len(gmagent.observationHistory) <= referhistory: return False
 
@@ -1808,7 +1808,7 @@ class DefensiveQAgent(ApproximateQAgent):
         features["bias"] = 1.0
         features['numOfInvaders'] = len(invaders)
 
-        self.debugDraw(self.target_position, (1, 1, 1), clear=True)
+        # self.debugDraw(self.target_position, (1, 1, 1), clear=True)
 
         return features
 
@@ -1948,6 +1948,7 @@ class DefensiveQAgent(ApproximateQAgent):
         if Cost > width * height and len(chaser) > 0:
             return True
 
+        ####NEW NEED TESTING
         # width * height
         if (len(gmagent.observationHistory) >= 10):
             index_state = -2
@@ -1964,14 +1965,27 @@ class DefensiveQAgent(ApproximateQAgent):
             myPreState = gmagent.observationHistory[index_state]
             myPrePos = myPreState.getAgentPosition(gmagent.index)
 
-            Preenemies = [myPreState.getAgentState(i) for i in gmagent.getOpponents(myPreState)]
-            Prechaser = [a.getPosition() for a in Preenemies if a.isPacman and a.getPosition() != None]
+            Preenemies = [(myPreState.getAgentState(i), i) for i in gmagent.getOpponents(myPreState)]
+            Prechaser = [(a.getPosition(), i) for a, i in Preenemies if a.isPacman and a.getPosition() != None]
+            goalPositions = [(half_position[0], height_position) for height_position in range(3, height - 1) if
+                             not gameState.hasWall(half_position[0], height_position)]
+            avoidPositions = [myPos]
+
+            startPosition = None
+            index_clog = 0
+            for a, i in Prechaser:
+                Path, Position, Cost = self.aStarSearch(gameState, goalPositions, startPosition=startPosition,
+                                                   avoidPositions=avoidPositions, returngoalPosition=False,
+                                                   returnCost=True)
+                if Cost > width * height:
+                    index_clog = i
+                    break
 
             # print("NOW===",myPrePos==myPos, myPrePos, myPos, index_state, len(Prechaser))
             while (index_state != -2):
                 myPreState = gmagent.observationHistory[index_state]
                 myPrePos = myPreState.getAgentPosition(gmagent.index)
-                Preenemies = [myPreState.getAgentState(i) for i in gmagent.getOpponents(myPreState)]
+                Preenemies = [myPreState.getAgentState(i) for i in gmagent.getOpponents(myPreState) if i == index_clog]
                 Prechaser = [a.getPosition() for a in Preenemies if a.isPacman and a.getPosition() != None]
                 if len(Prechaser) == 0:
                     break
