@@ -1695,7 +1695,7 @@ class DefensiveQAgent(ApproximateQAgent):
                     bestLocations = [a for a, v in zip(entrances, distances) if v == minValue]
                     self.target_position = random.choice(bestLocations)
                 else:
-                    successor_food_clusters = kmeans(self.getFoodYouAreDefending(state), 2)
+                    successor_food_clusters = self.kmeans(self.getFoodYouAreDefending(state), 2)
                     best_food_cluster = max(successor_food_clusters,
                                             key=lambda item: item[1])[0]
                     self.target_position = best_food_cluster
@@ -1939,3 +1939,49 @@ class DefensiveQAgent(ApproximateQAgent):
                     scared = True
                     break
         return scared
+
+    def kmeans(self, myFood, parameter=6):
+        width = myFood.width
+        height = myFood.height
+        foodlist = [(i, j) for i in range(width) for j in range(height) if myFood[i][j] == True]
+        k = max(1, len(foodlist) / parameter)
+
+        if len(foodlist) > 0:
+            centers_ = random.sample(foodlist, k)
+            centers = [(i, 1) for i in centers_]
+            flag = 0
+            while (1 or flag > 20):
+                flag += 1
+                new_clusters = [[i[0]] for i in centers]
+                new_centers = []
+
+                for i in foodlist:
+                    distance = distanceCalculator.manhattanDistance(i, centers[0][0])
+                    index = 0
+                    for j in range(1, len(centers)):
+                        dis = distanceCalculator.manhattanDistance(i, centers[j][0])
+                        if dis < distance:
+                            distance = dis
+                            index = j
+                    new_clusters[index].append(i)
+
+                for i in range(len(new_clusters)):
+                    x_leng = 0
+                    y_leng = 0
+                    for j in range(len(new_clusters[i])):
+                        x_leng += new_clusters[i][j][0]
+                        y_leng += new_clusters[i][j][1]
+                    new_center = (x_leng / len(new_clusters[i]), y_leng / len(new_clusters[i]))
+                    dis_close = 99999
+                    close_food = new_clusters[i][0]
+                    for j in range(len(new_clusters[i])):
+                        dis2 = distanceCalculator.manhattanDistance(new_clusters[i][j], new_center)
+                        if dis2 <= dis_close:
+                            dis_close = dis2
+                            close_food = new_clusters[i][j]
+
+                    new_centers.append((close_food, len(new_clusters[i])))
+                if (new_centers == centers):
+                    break;
+                centers = new_centers
+        return new_centers
