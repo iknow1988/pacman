@@ -768,6 +768,36 @@ def RunForestCheckDeadAlley(gmagent, gameState, action):
 
 
 
+def LoopBreakerMoniter(gmagent, gameState, referhistory=12):
+    """
+    
+    ####FOR OFFENSIVE AGENTS####    
+    Return True when our agents need to break a loop..
+    
+    Logic: If our distance from the ghost remain the same for last 12(referhistroy) states
+        Then we need to break the loop by CHANGING TAGET POSITION TO THE BOUNDRIES
+    """
+    if len(gmagent.observationHistory)<=referhistory: return False
+    
+    myPos = gmagent.getCurrentObservation().getAgentPosition(gmagent.index)
+    enemies = [gameState.getAgentState(i) for i in gmagent.getOpponents(gameState)]
+    chaser = [a.getPosition() for a in enemies if (not a.isPacman) and a.getPosition() != None]
+    
+    if len(chaser)>0:
+        referDistance = gmagent.getMazeDistance(myPos, chaser[0])
+    else:return False
+    for i in range(-referhistory, -1):
+        myPreState = gmagent.observationHistory[i]
+        myPrePos = myPreState.getAgentPosition(gmagent.index)
+        Preenemies = [myPreState.getAgentState(i) for i in gmagent.getOpponents(myPreState)]
+        Prechaser = [a.getPosition() for a in Preenemies if (not a.isPacman) and a.getPosition() != None]
+        if len(Prechaser)==0:
+            return False
+        PreDist = gmagent.getMazeDistance(myPrePos, Prechaser[0])
+        if PreDist != referDistance:
+            return False
+    return True
+  
 
 
 
