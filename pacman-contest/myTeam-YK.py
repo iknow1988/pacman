@@ -636,6 +636,9 @@ def FindAlternativeFood(gmagent, gameState, returngoalPosition=True):
     return stackpath, currentPosition
        
  
+last_seen_opponent=None
+
+
 def CloggingOpponent(gmagent, gameState, returngoalPosition = False):
     """
     CLOGGING NOT EATING OPPONENTS!!!
@@ -652,6 +655,7 @@ def CloggingOpponent(gmagent, gameState, returngoalPosition = False):
     enemies = [gameState.getAgentState(i) for i in gmagent.getOpponents(gameState)]
     chaser = [a.getPosition() for a in enemies if a.isPacman and a.getPosition() != None]
     
+   
     walls = gameState.getWalls()
     height = walls.height
     width = walls.width
@@ -670,11 +674,65 @@ def CloggingOpponent(gmagent, gameState, returngoalPosition = False):
         startPosition=chaser[0]
         
     Path, Position, Cost =aStarSearch(gmagent, gameState, goalPositions, startPosition=startPosition, avoidPositions=avoidPositions, returngoalPosition=False, returnCost= True)
-    if Cost > width * height:
+    
+    if len(chaser)>1:
+        Path2, Position2, Cost2 =aStarSearch(gmagent, gameState, goalPositions, startPosition=chaser[1], avoidPositions=avoidPositions, returngoalPosition=False, returnCost= True)
+        if Cost2>Cost:
+            Cost=Cost2
+    
+    if Cost > width * height and len(chaser)>0:
         return True
+    
+    ####NEW NEED TESTING
     #width * height
-    return False
+    if (len(gmagent.observationHistory)>=10):
+        index_state=-2
+        myPreState = gmagent.observationHistory[index_state]
+        myPrePos = myPreState.getAgentPosition(gmagent.index)
+        if (myPrePos!=myPos):
+            return False
+        while(myPrePos==myPos):
+            index_state-=1
+            myPreState = gmagent.observationHistory[index_state]
+            myPrePos = myPreState.getAgentPosition(gmagent.index)
+               
+        index_state+=1
+        myPreState = gmagent.observationHistory[index_state]
+        myPrePos = myPreState.getAgentPosition(gmagent.index)
+        
+        Preenemies = [(myPreState.getAgentState(i),i) for i in gmagent.getOpponents(myPreState)]
+        Prechaser = [(a.getPosition(), i) for a,i in Preenemies if a.isPacman and a.getPosition() != None]
+        goalPositions = [(half_position[0], height_position) for height_position in range(3, height-1) if not gameState.hasWall(half_position[0], height_position)]
+        avoidPositions=[myPos]
+        
+        startPosition=None
+        index_clog=0
+        for a,i in Prechaser:
+            Path, Position, Cost =aStarSearch(gmagent, gameState, goalPositions, startPosition=startPosition, avoidPositions=avoidPositions, returngoalPosition=False, returnCost= True)
+            if Cost > width * height:
+                index_clog = i
+                break
 
+        
+        #print("NOW===",myPrePos==myPos, myPrePos, myPos, index_state, len(Prechaser))
+        while(index_state!=-2):
+            myPreState = gmagent.observationHistory[index_state]
+            myPrePos = myPreState.getAgentPosition(gmagent.index)
+            Preenemies = [myPreState.getAgentState(i) for i in gmagent.getOpponents(myPreState) if i == index_clog]
+            Prechaser = [a.getPosition() for a in Preenemies if a.isPacman and a.getPosition() != None]
+            if len(Prechaser) == 0:
+                break
+            index_state += 1
+        index_state -= 1
+        myPreState = gmagent.observationHistory[index_state]
+        myPrePos = myPreState.getAgentPosition(gmagent.index)
+        #print("AFTER===",myPrePos==myPos, myPrePos, myPos, index_state, len(Prechaser))
+        Preenemies = [myPreState.getAgentState(i) for i in gmagent.getOpponents(myPreState)]
+        Prechaser = [a.getPosition() for a in Preenemies if a.isPacman and a.getPosition() != None]
+        if len(Prechaser)>0 and gmagent.getMazeDistance(myPrePos,Prechaser[0])>3: return True
+    
+
+    return False
 
 def CheckIfAgentStucking(gmagent, gameState, referhistory=10, countingfactor=3):
     """
@@ -724,10 +782,205 @@ def RunForestCheckDeadAlley(gmagent, gameState, action):
 
 
 
+def LoopBreakerMoniter(gmagent, gameState, referhistory=12):
+    """
+    
+    ####FOR OFFENSIVE AGENTS####    
+    Return True when our agents need to break a loop..
+    
+    Logic: If our distance from the ghost remain the same for last 12(referhistroy) states
+        Then we need to break the loop by CHANGING TAGET POSITION TO THE BOUNDRIES
+    """
+    if len(gmagent.observationHistory)<=referhistory: return False
+    
+    myPos = gmagent.getCurrentObservation().getAgentPosition(gmagent.index)
+    enemies = [gameState.getAgentState(i) for i in gmagent.getOpponents(gameState)]
+    chaser = [a.getPosition() for a in enemies if (not a.isPacman) and a.getPosition() != None]
+    
+    if len(chaser)>0:
+        referDistance = gmagent.getMazeDistance(myPos, chaser[0])
+    else:return False
+    for i in range(-referhistory, -1):
+        myPreState = gmagent.observationHistory[i]
+        myPrePos = myPreState.getAgentPosition(gmagent.index)
+        Preenemies = [myPreState.getAgentState(i) for i in gmagent.getOpponents(myPreState)]
+        Prechaser = [a.getPosition() for a in Preenemies if (not a.isPacman) and a.getPosition() != None]
+        if len(Prechaser)==0:
+            return False
+        PreDist = gmagent.getMazeDistance(myPrePos, Prechaser[0])
+        if PreDist != referDistance:
+            return False
+    return True
+  
 
 
 
 
+
+
+
+
+
+
+
+
+    
+    
+def EscapePathForOpponent(gmagent, gameState, returngoalPosition=False):
+    ##astar:gmagent, gameState, goalPositions, startPosition=None, avoidPositions=[], returngoalPosition=False
+    """
+    Input:
+        gmagent: Game Agent
+        gameState: Current Game State
+        returngoalPosition: not return position if it's False
+        
+    Output:
+        Simulate the opponents' escape plan path to the boundries       
+    
+    IDEA:
+        It can be implemented into Offensive Agent and used when the opponents' ghosts are
+        within 2 steps away.
+    """
+    ##get ghost position
+    ###get own position
+    ####call A-star..
+    myPos = gmagent.getCurrentObservation().getAgentPosition(gmagent.index)
+    enemies = [gameState.getAgentState(i) for i in gmagent.getOpponents(gameState)]
+    enemiesPacman = [a.getPosition() for a in enemies if a.isPacman and a.getPosition() != None]
+        
+    walls = gameState.getWalls()
+    height = walls.height
+    width = walls.width
+    walls = walls.asList()
+
+    half_position=(int(gameState.data.layout.width/2-gmagent.red*(-1)),int(gameState.data.layout.height/2))
+    while(gameState.hasWall(half_position[0],half_position[1])):
+        half_position=(half_position[0],half_position[1]-1) 
+    startPos=enemiesPacman[0]
+    avoidPos=[myPos]
+    goalPositions = [(half_position[0], height_position) for height_position in range(1, height-1) if not gameState.hasWall(half_position[0], height_position)]
+    
+    
+    X=min(width/4, 3)
+    Y=min(height/4, 3)
+    
+    for posX in range(int(max(1,myPos[0]-X)), int(min(width,myPos[0]+X))):
+            for posY in range(int(max(0,myPos[1]-Y)), int(min(height,myPos[1]+Y))):
+                if not gameState.hasWall(posX, posY):
+                    if (abs(posX-myPos[0])+abs(posY-myPos[1]))<=2:
+                        avoidPos.append((posX, posY))
+                    if (posX, posY) in goalPositions:
+                        goalPositions.remove((posX,posY))
+        
+    if len(enemiesPacman)!=0:
+        
+        return aStarSearch(gmagent, gameState, goalPositions=goalPositions, startPosition=startPos, avoidPositions=avoidPos, returngoalPosition=False)
+    return [] 
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+def InterceptOpponents(gmagent, gameState):   
+    walls = gameState.getWalls().asList()
+    actions = [Directions.NORTH, Directions.SOUTH, Directions.EAST, Directions.WEST]
+    actions_string= ["North", "South", "East", "West"]
+    actionVectors = [(int(Actions.directionToVector(action)[0]), int(Actions.directionToVector(action)[1])) for action in actions]
+    
+    myPos = gmagent.getCurrentObservation().getAgentPosition(gmagent.index)
+    enemies = [gameState.getAgentState(i) for i in gmagent.getOpponents(gameState)]
+    enemiesPacman = [a.getPosition() for a in enemies if a.isPacman and a.getPosition() != None]
+    if len(enemiesPacman)==0:
+        return None ##JUST IN CASE
+    currentPos = enemiesPacman[0]
+    
+    
+    possiblePositions = [(currentPos[0] + vector[0], currentPos[1] + vector[1]) for vector, action in zip(actionVectors, actions)]
+    legalPositions = [position for position in possiblePositions if position not in walls]
+    
+    if len(legalPositions)>2:
+        return None
+    OpponentPath=EscapePathForOpponent(gmagent, gameState)
+    if len(OpponentPath)==0:
+        return None
+    lenParameter=min(6, len(OpponentPath))
+    OpponentPath=OpponentPath[:lenParameter]
+    
+    avoidPos=[enemiesPacman[0]]
+    goalPos=[]
+    startPos=myPos
+    
+    for act in OpponentPath:
+        actVec = actionVectors[actions.index(act)]
+        currentPos = (currentPos[0]+actVec[0], currentPos[1]+actVec[1])
+        goalPos.append(currentPos)
+        
+    AlternativePath, GoalPosition = aStarIntercept(gmagent, gameState, goalPos, startPos, avoidPos, enemiesPacman[0], returngoalPosition=True)
+    if len(AlternativePath)<=lenParameter + 2:
+        return GoalPosition
+    return None
+
+
+
+
+def aStarIntercept(gmagent, gameState, goalPositions, startPosition, avoidPositions, OriginalPosition, returngoalPosition=False, returnCost= False):
+    """
+    Similar with aStar but adding heuristic function with penalties
+        
+    """
+    walls = gameState.getWalls()
+    width = walls.width
+    height = walls.height
+    walls = walls.asList()
+    if startPosition==None:
+        startPosition=gmagent.getCurrentObservation().getAgentPosition(gmagent.index)
+    
+    actions = [Directions.NORTH, Directions.SOUTH, Directions.EAST, Directions.WEST]
+    actionVectors = [(int(Actions.directionToVector(action)[0]), int(Actions.directionToVector(action)[1])) for action in actions]
+    currentPosition, currentPath, currentCost = startPosition, [], 0
+
+    queue = util.PriorityQueueWithFunction(lambda entry: entry[2] +   # Total cost so far
+                                           #width * height if entry[0] in avoidPositions else 0 +  # Avoid enemy locations like the plague
+                                           min(gmagent.getMazeDistance(entry[0], endPosition) for endPosition in goalPositions) +
+                                           len(goalPositions) -  2 * gmagent.getMazeDistance(entry[0], OriginalPosition)
+                                           )
+                                           #
+                                           
+    # No Revisits
+    visited = set([currentPosition])
+
+    while currentPosition not in goalPositions:
+        possiblePositions = [((currentPosition[0] + vector[0], currentPosition[1] + vector[1]), action) for vector, action in zip(actionVectors, actions)]
+        legalPositions = [(position, action) for position, action in possiblePositions if position not in walls]
+        for position, action in legalPositions:
+            if position not in visited:
+                visited.add(position)
+                AvoidValue=0 
+                if position in avoidPositions:
+                    AvoidValue=10
+                queue.push((position, currentPath + [action], currentCost + 1 + AvoidValue ))                
+        if queue.isEmpty():##Just in case
+            return None
+        else:
+            currentPosition, currentPath, currentCost = queue.pop()    
+    if returnCost:
+        return currentPath, currentPosition, currentCost
+    
+    if returngoalPosition:
+        return currentPath, currentPosition
+    
+    else:
+        return currentPath
+    return currentPath
 
 
 
