@@ -1435,7 +1435,7 @@ class OffensiveQAgent(ApproximateQAgent):
         if len(ghosts) > 0:
             distancesToGhosts = [self.getMazeDistance(myNextPosition, a.getPosition()) for a in ghosts]
             minDist = min(distancesToGhosts)
-            if minDist > 5:
+            if minDist > 5 or self.isOpponentScared(successor):
                 self.carryLimit = self.max_score
             else:
                 self.carryLimit = 10
@@ -1567,6 +1567,7 @@ class OffensiveQAgent(ApproximateQAgent):
     def computeActionFromQValues(self, gameState):
         actions = gameState.getLegalActions(self.index)
         actions.remove('Stop')
+        b = actions[:]
         ghosts = self.getGhosts(gameState)
         myCurrentState = gameState.getAgentState(self.index)
         myCurrentPosition = myCurrentState.getPosition()
@@ -1575,7 +1576,6 @@ class OffensiveQAgent(ApproximateQAgent):
             if not self.isOpponentScared(gameState) and min(distancesToGhosts) <= 5 and myCurrentState.isPacman:
                 if len(actions) > 0:
                     actions = self.getSafeActions(gameState, actions)
-
         values = [self.getQValue(gameState, a) for a in actions]
         maxValue = max(values)
         bestActions = [a for a, v in zip(actions, values) if v == maxValue]
@@ -1649,13 +1649,12 @@ class DefensiveQAgent(ApproximateQAgent):
 
     def registerInitialState(self, gameState):
         ApproximateQAgent.registerInitialState(self, gameState)
-        self.target_position = min(self.entrances,
-                                   key=lambda x: self.getMazeDistance(gameState.getAgentState(self.index).getPosition(),
-                                                                      x))
+        self.target_position = self.minDistantEntrance
         self.alternativePath = []
 
     def getFeatures(self, state, action):
         features = util.Counter()
+        myCurrentState = state.getAgentState(self.index)
         myPosition = state.getAgentState(self.index).getPosition()
         successor = self.getSuccessor(state, action)
         newState = successor.getAgentState(self.index)
@@ -1664,7 +1663,7 @@ class DefensiveQAgent(ApproximateQAgent):
         ghosts = self.getGhosts(successor)
         missingFoods = self.getMissingFoods(state)
         foodListDefending = self.getFoodYouAreDefending(state).asList()
-        foodListToEat = self.getFood(successor).asList()
+        foodListToEat = self.getFood(state).asList()
         if not newState.isPacman:
             self.alternativePath = []
 
@@ -1673,7 +1672,7 @@ class DefensiveQAgent(ApproximateQAgent):
             self.target_position = min(self.entrances, key=lambda x: self.getMazeDistance(newPos, x))
 
         if self.target_position == myPosition:
-            if (self.getScore(state) < 5 or len(missingFoods) < 1) \
+            if (self.getScore(state) < 5 or newState.scaredTimer > 0) \
                     and len(foodListDefending) > 5 and len(foodListToEat) > 2 \
                     and len(foodListToEat) > len(foodListDefending):
                 self.target_position = min(foodListToEat, key=lambda x: self.getMazeDistance(newPos, x))
@@ -1682,21 +1681,28 @@ class DefensiveQAgent(ApproximateQAgent):
                     entrances = self.entrances
                     distances = []
                     for entrance in entrances:
-                        distances = min(self.getFoodYouAreDefending(state).asList(),
-                                                  key=lambda x: self.getMazeDistance(newPos, x))
+                        dist = 0
+                        for food in foodListDefending:
+                            dist = dist + self.getMazeDistance(food, entrance)
+                        distances.append(dist)
                     minValue = min(distances)
                     bestLocations = [a for a, v in zip(entrances, distances) if v == minValue]
                     self.target_position = random.choice(bestLocations)
                 else:
-                    self.target_position = foodListDefending[int(random.uniform(0, len(foodListDefending)))]
+                    successor_food_clusters = kmeans(self.getFoodYouAreDefending(state), 2)
+                    best_food_cluster = max(successor_food_clusters,
+                                            key=lambda item: item[1])[0]
+                    self.target_position = best_food_cluster
 
         distanceToInvaders = [0]
         distanceToGhosts = [0]
         minDistanceToInvader = 0.0
         minDistanceToGhost = 0.0
+        distanceToInvader = 0.0
         if len(invaders) > 0:
             distanceToInvaders = [self.getMazeDistance(newPos, a.getPosition()) for a in invaders]
-            if not newState.isPacman:
+            distanceToInvader = min(distanceToInvaders)
+            if not newState.isPacman and not myCurrentState.scaredTimer > 0:
                 minDistanceToInvader = min(distanceToInvaders) * 1.0 / self.gridSize
             if newState.isPacman and min(distanceToInvaders) <= 2:
                 minDistanceToGhost = -1.0 * min(distanceToInvaders)
@@ -1706,15 +1712,19 @@ class DefensiveQAgent(ApproximateQAgent):
             if newState.isPacman and min(distanceToGhosts) <= 1:
                 minDistanceToGhost = -1.0 * min(distanceToGhosts)
 
+        if newState.scaredTimer > 0:
+            self.target_position = min(foodListToEat, key=lambda x: self.getMazeDistance(newPos, x))
+
         features['scaredState'] = 0.0
         if newState.scaredTimer > 0:
             features['scaredState'] = (min(distanceToInvaders) - newState.scaredTimer) * 1.0 / self.gridSize
 
         dist_miss = 0.0
         if len(missingFoods) > 0:
-            self.target_position = missingFoods[0][0]
-            for pos, i in missingFoods:
-                dist_miss += self.getMazeDistance(pos, newPos)
+            if not newState.scaredTimer > 0 and distanceToInvader > 5 and not myCurrentState.isPacman:
+                self.target_position = missingFoods[0][0]
+                for pos, i in missingFoods:
+                    dist_miss += self.getMazeDistance(pos, newPos)
 
         features['invaderDistance'] = minDistanceToInvader
         features["isPacman"] = minDistanceToGhost
