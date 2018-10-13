@@ -1133,9 +1133,9 @@ class ApproximateQAgent(CaptureAgent):
         # get middle
         self.walls = gameState.getWalls()
         if self.red:
-            offset = 1
+            offset = 2
         else:
-            offset = -1
+            offset = -2
         midPosition = [(self.walls.width / 2 - offset, i) for i in range(1, self.walls.height - 1)]
         entrances = []
         for i in midPosition:
@@ -1720,10 +1720,7 @@ class DefensiveQAgent(ApproximateQAgent):
             self.alternativePath = []
 
         if self.target_position == myPosition:
-            if newState.isPacman and len(foodListToEat) > 2 and \
-                    (self.isOpponentScared(state) or myCurrentState.numCarrying < self.carryLimit):
-                self.target_position = min(foodListToEat, key=lambda x: self.getMazeDistance(newPos, x))
-            if (self.getScore(state) < 6 or newState.scaredTimer > 0) \
+            if ((self.getScore(state) < 6 and self.getScore(state) != 0) or newState.scaredTimer > 0) \
                     and len(foodListDefending) > 6 and len(foodListToEat) > 2 \
                     and len(foodListToEat) > len(foodListDefending):
                 self.target_position = min(foodListToEat, key=lambda x: self.getMazeDistance(newPos, x))
@@ -1768,7 +1765,7 @@ class DefensiveQAgent(ApproximateQAgent):
 
         if len(ghosts) > 0:
             distanceToGhosts = [self.getMazeDistance(newPos, a.getPosition()) for a in ghosts]
-            if newState.isPacman and min(distanceToGhosts) <= 1:
+            if newState.isPacman and min(distanceToGhosts) <= 1 and not self.isOpponentScared(state):
                 minDistanceToGhost = -1.0 * min(distanceToGhosts)
 
         if newState.scaredTimer > 0 and len(foodListToEat)>0:
@@ -1811,10 +1808,11 @@ class DefensiveQAgent(ApproximateQAgent):
         features["bias"] = 1.0
         features['numOfInvaders'] = len(invaders)
 
+        self.debugDraw(self.target_position, (1, 1, 1), clear=True)
+
         return features
 
     def observationFunction(self, state):
-        # self.debugDraw(self.target_position, (1, 1, 1), clear=True)
         if self.lastState:
             distancePosition = self.getMazeDistance(state.getAgentState(self.index).getPosition(),
                                                     self.lastState.getAgentState(self.index).getPosition())
@@ -1905,14 +1903,6 @@ class DefensiveQAgent(ApproximateQAgent):
         elif not gameState.getAgentState(self.index).isPacman and self.CloggingOpponent(gameState):
             action = 'Stop'
 
-        elif gameState.getAgentState(self.index).isPacman and self.CheckIfAgentStucking(gameState):
-            actions, goalDestination = self.FindAlternativeFood(gameState)
-            if actions:
-                self.alternativePath = actions
-                action = self.alternativePath.pop()
-            else:
-                actions = gameState.getLegalActions(self.index)
-                action = random.choice(actions)
         else:
             actions = gameState.getLegalActions(self.index)
             action = self.computeActionFromQValues(gameState)
