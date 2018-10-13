@@ -636,6 +636,8 @@ def FindAlternativeFood(gmagent, gameState, returngoalPosition=True):
     return stackpath, currentPosition
        
  
+last_seen_opponent=None
+
 def CloggingOpponent(gmagent, gameState, returngoalPosition = False):
     """
     CLOGGING NOT EATING OPPONENTS!!!
@@ -652,6 +654,7 @@ def CloggingOpponent(gmagent, gameState, returngoalPosition = False):
     enemies = [gameState.getAgentState(i) for i in gmagent.getOpponents(gameState)]
     chaser = [a.getPosition() for a in enemies if a.isPacman and a.getPosition() != None]
     
+   
     walls = gameState.getWalls()
     height = walls.height
     width = walls.width
@@ -668,13 +671,34 @@ def CloggingOpponent(gmagent, gameState, returngoalPosition = False):
     
     if len(chaser)>0:
         startPosition=chaser[0]
+        last_seen_opponent=startPosition
         
     Path, Position, Cost =aStarSearch(gmagent, gameState, goalPositions, startPosition=startPosition, avoidPositions=avoidPositions, returngoalPosition=False, returnCost= True)
+    
+    if len(chaser)>1:
+        Path2, Position2, Cost2 =aStarSearch(gmagent, gameState, goalPositions, startPosition=chaser[1], avoidPositions=avoidPositions, returngoalPosition=False, returnCost= True)
+        if Cost2>Cost:
+            last_seen_opponent=chaser[1]
+            Cost=Cost2
+    
     if Cost > width * height:
         return True
+    
+    ####NEW NEED TESTING
     #width * height
+    if len(gmagent.observationHistory)>=2:
+        myPreState = gmagent.observationHistory[-2]
+        myPrePos = gmagent.getPreviousObservation().getAgentPosition(gmagent.index)
+        
+        if myPrePos==myPos:
+            Preenemies = [myPreState.getAgentState(i) for i in gmagent.getOpponents(myPreState)]
+            chaser = [a.getPosition() for a in Preenemies if a.isPacman and a.getPosition() != None]
+            if len(chaser) == 0:
+                Dist1=gmagent.getMazeDistance(myPrePos,last_seen_opponent)
+                if Dist1>=3: return True
+    ####END NEW NEED TESTING      
+    
     return False
-
 
 def CheckIfAgentStucking(gmagent, gameState, referhistory=10, countingfactor=3):
     """
