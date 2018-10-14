@@ -1901,7 +1901,7 @@ class DefensiveQAgent(ApproximateQAgent):
 
     def chooseAction(self, gameState):
         actions = gameState.getLegalActions(self.index)
-        if gameState.getAgentState(self.index).isPacman and self.CloggingOpponent(gameState):
+        if not gameState.getAgentState(self.index).isPacman and self.CloggingOpponent(gameState):
             action = 'Stop'
         else:
             actions = gameState.getLegalActions(self.index)
