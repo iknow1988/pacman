@@ -826,6 +826,7 @@ def LoopBreakerMoniter(gmagent, gameState, referhistory=12):
 
     
     
+    
 def EscapePathForOpponent(gmagent, gameState, returngoalPosition=False):
     ##astar:gmagent, gameState, goalPositions, startPosition=None, avoidPositions=[], returngoalPosition=False
     """
@@ -876,24 +877,11 @@ def EscapePathForOpponent(gmagent, gameState, returngoalPosition=False):
         
         return aStarSearch(gmagent, gameState, goalPositions=goalPositions, startPosition=startPos, avoidPositions=avoidPos, returngoalPosition=False)
     return [] 
-    
-
-
-
-
-
-
-
-
-
-
-
 
 
 def InterceptOpponents(gmagent, gameState):   
     walls = gameState.getWalls().asList()
     actions = [Directions.NORTH, Directions.SOUTH, Directions.EAST, Directions.WEST]
-    actions_string= ["North", "South", "East", "West"]
     actionVectors = [(int(Actions.directionToVector(action)[0]), int(Actions.directionToVector(action)[1])) for action in actions]
     
     myPos = gmagent.getCurrentObservation().getAgentPosition(gmagent.index)
@@ -906,7 +894,16 @@ def InterceptOpponents(gmagent, gameState):
     
     possiblePositions = [(currentPos[0] + vector[0], currentPos[1] + vector[1]) for vector, action in zip(actionVectors, actions)]
     legalPositions = [position for position in possiblePositions if position not in walls]
-    
+    if len(gmagent.observationHistory) > 2:
+        myPreState = gmagent.observationHistory[-2]
+        #myPrePos = myPreState.getAgentPosition(gmagent.index)
+        Preenemies = [myPreState.getAgentState(i) for i in gmagent.getOpponents(myPreState)]
+        Prechaser = [a.getPosition() for a in Preenemies if a.isPacman and a.getPosition() != None]
+        if len(Prechaser)==0:
+            print("FUCKING PRECHASER IS 0--000")
+            return None
+        if (gmagent.getMazeDistance(myPos, enemiesPacman[0]) < gmagent.getMazeDistance(myPos, Prechaser[0])): return None
+
     if len(legalPositions)>2:
         return None
     OpponentPath=EscapePathForOpponent(gmagent, gameState)
@@ -925,8 +922,8 @@ def InterceptOpponents(gmagent, gameState):
         goalPos.append(currentPos)
         
     AlternativePath, GoalPosition = aStarIntercept(gmagent, gameState, goalPos, startPos, avoidPos, enemiesPacman[0], returngoalPosition=True)
-    if len(AlternativePath)<=lenParameter + 2:
-        return GoalPosition
+    if len(AlternativePath)<=lenParameter:
+        return GoalPosition    
     return None
 
 
@@ -950,11 +947,8 @@ def aStarIntercept(gmagent, gameState, goalPositions, startPosition, avoidPositi
 
     queue = util.PriorityQueueWithFunction(lambda entry: entry[2] +   # Total cost so far
                                            #width * height if entry[0] in avoidPositions else 0 +  # Avoid enemy locations like the plague
-                                           min(gmagent.getMazeDistance(entry[0], endPosition) for endPosition in goalPositions) +
-                                           len(goalPositions) -  2 * gmagent.getMazeDistance(entry[0], OriginalPosition)
-                                           )
-                                           #
-                                           
+                                           min(gmagent.getMazeDistance(entry[0], endPosition)- 2 * gmagent.getMazeDistance(endPosition, OriginalPosition) for endPosition in goalPositions) 
+                                           )                                           
     # No Revisits
     visited = set([currentPosition])
 
@@ -966,7 +960,7 @@ def aStarIntercept(gmagent, gameState, goalPositions, startPosition, avoidPositi
                 visited.add(position)
                 AvoidValue=0 
                 if position in avoidPositions:
-                    AvoidValue=10
+                    AvoidValue=width * height
                 queue.push((position, currentPath + [action], currentCost + 1 + AvoidValue ))                
         if queue.isEmpty():##Just in case
             return None
@@ -981,7 +975,5 @@ def aStarIntercept(gmagent, gameState, goalPositions, startPosition, avoidPositi
     else:
         return currentPath
     return currentPath
-
-
 
 
