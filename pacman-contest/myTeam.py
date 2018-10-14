@@ -899,7 +899,8 @@ class DefensiveQAgent(ApproximateQAgent):
             index_state = -2
             myPreState = gmagent.observationHistory[index_state]
             myPrePos = myPreState.getAgentPosition(gmagent.index)
-            if (myPrePos != myPos):
+
+            if (myPrePos != myPos and abs(index_state) > (len(gmagent.observationHistory) - 5)):
                 return False
             while (myPrePos == myPos):
                 index_state -= 1
@@ -932,9 +933,10 @@ class DefensiveQAgent(ApproximateQAgent):
                 myPrePos = myPreState.getAgentPosition(gmagent.index)
                 Preenemies = [myPreState.getAgentState(i) for i in gmagent.getOpponents(myPreState) if i == index_clog]
                 Prechaser = [a.getPosition() for a in Preenemies if a.isPacman and a.getPosition() != None]
+                index_state += 1
                 if len(Prechaser) == 0:
                     break
-                index_state += 1
+
             index_state -= 2
             myPreState = gmagent.observationHistory[index_state]
             myPrePos = myPreState.getAgentPosition(gmagent.index)
