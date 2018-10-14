@@ -900,9 +900,9 @@ class DefensiveQAgent(ApproximateQAgent):
             myPreState = gmagent.observationHistory[index_state]
             myPrePos = myPreState.getAgentPosition(gmagent.index)
 
-            if (myPrePos != myPos and abs(index_state) > (len(gmagent.observationHistory) - 5)):
+            if (myPrePos != myPos):
                 return False
-            while (myPrePos == myPos):
+            while (myPrePos == myPos and abs(index_state) > (len(gmagent.observationHistory) - 5)):
                 index_state -= 1
                 myPreState = gmagent.observationHistory[index_state]
                 myPrePos = myPreState.getAgentPosition(gmagent.index)
