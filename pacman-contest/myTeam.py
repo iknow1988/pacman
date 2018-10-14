@@ -687,7 +687,7 @@ class DefensiveQAgent(ApproximateQAgent):
         minDistanceToGhost = 0.0
         if len(invaders) > 0:
             distanceToInvaders = [self.getMazeDistance(newPos, a.getPosition()) for a in invaders]
-            if not newState.isPacman and not newState.scaredTimer > 0:
+            if not newState.isPacman:
                 minDistanceToInvader = min(distanceToInvaders)
 
         if len(ghosts) > 0:
