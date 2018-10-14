@@ -1773,23 +1773,23 @@ class DefensiveQAgent(ApproximateQAgent):
         if len(missingFoods) > 0 and newState.scaredTimer == 0:
             self.target_position = missingFoods[0][0]
             for pos, i in missingFoods:
-                dist_miss += self.getMazeDistance(pos, myPosition)
+                dist_miss += self.getMazeDistance(pos, newPos)
 
         # reached carry limit go back to home
         if newState.isPacman and not self.isOpponentScared(state) and len(ghosts)>0 \
                 and myCurrentState.numCarrying >= self.carryLimit:
-            self.target_position = min(self.entrances, key=lambda x: self.getMazeDistance(myPosition, x))
+            self.target_position = min(self.entrances, key=lambda x: self.getMazeDistance(newPos, x))
             
         # End of time and go back to home
         timeLeft = state.data.timeleft * 1.0 / state.getNumAgents()
-        target = min(self.entrances, key=lambda x: self.getMazeDistance(myPosition, x))
+        target = min(self.entrances, key=lambda x: self.getMazeDistance(newPos, x))
         dist = self.getMazeDistance(newPos, target)
         if newState.isPacman and (timeLeft - dist < 1.0):
             self.target_position = target
 
         # # eaten everything go back home
         if newState.isPacman and len(foodListToEat) <= 2:
-            self.target_position = min(self.entrances, key=lambda x: self.getMazeDistance(myPosition, x))
+            self.target_position = min(self.entrances, key=lambda x: self.getMazeDistance(newPos, x))
 
         features['scaredState'] = 0.0
         if newState.scaredTimer > 0:
