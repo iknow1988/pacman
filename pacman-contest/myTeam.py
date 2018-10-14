@@ -1540,7 +1540,7 @@ class OffensiveQAgent(ApproximateQAgent):
             if distancePosition > 1:
                 self.alternativePath = []
                 if (len(self.getFood(state).asList())) > 0:
-                    self.target_position = min(self.getFood(state).asList(),
+                    self.target_position = max(self.getFood(state).asList(),
                                                key=lambda x: self.getMazeDistance(
                                                    state.getAgentState(self.index).getPosition(),
                                                    x))
@@ -1753,11 +1753,11 @@ class DefensiveQAgent(ApproximateQAgent):
         if newState.scaredTimer > 0 and len(foodListToEat) > 2:
             self.target_position = min(foodListToEat, key=lambda x: self.getMazeDistance(newPos, x))
 
-        if self.getScore(state) <= 5 and len(foodListDefending) > 6 and len(foodListToEat) > 2:
+        if self.getScore(state) != 0 and self.getScore(state) <= 5 and len(foodListDefending) > 6 and len(foodListToEat) > 2:
             self.target_position = min(foodListToEat, key=lambda x: self.getMazeDistance(newPos, x))
 
         # Eat capsule if it is near
-        if myCurrentState.isPacman and len(capsules) > 0 and not self.isOpponentScared(state) and len(ghosts) > 0:
+        if myCurrentState.isPacman and len(capsules) > 0 and not self.isOpponentScared(state):
             if self.getMazeDistance(newPos, self.target_position) > self.getMazeDistance(newPos, minDistantCapsule):
                 self.target_position = minDistantCapsule
 
