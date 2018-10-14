@@ -692,7 +692,7 @@ class DefensiveQAgent(ApproximateQAgent):
 
         if len(ghosts) > 0:
             distanceToGhosts = [self.getMazeDistance(newPos, a.getPosition()) for a in ghosts]
-            if min(distanceToGhosts) <= 2 and not self.isOpponentScared(state):
+            if newState.isPacman and min(distanceToGhosts) <= 2 and not self.isOpponentScared(state):
                 minDistanceToGhost = -1.0 * min(distanceToGhosts)
 
         # Opponent ate capsule so go to offensive
