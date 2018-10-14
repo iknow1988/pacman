@@ -880,12 +880,13 @@ class DefensiveQAgent(ApproximateQAgent):
             startPosition = chaser[0]
 
         Path, Position, Cost = self.aStarSearch(gameState, goalPositions, startPosition=startPosition,
-                                           avoidPositions=avoidPositions, returngoalPosition=False, returnCost=True)
+                                                avoidPositions=avoidPositions, returngoalPosition=False,
+                                                returnCost=True)
 
         if len(chaser) > 1:
             Path2, Position2, Cost2 = self.aStarSearch(gameState, goalPositions, startPosition=chaser[1],
-                                                  avoidPositions=avoidPositions, returngoalPosition=False,
-                                                  returnCost=True)
+                                                       avoidPositions=avoidPositions, returngoalPosition=False,
+                                                       returnCost=True)
             if Cost2 > Cost:
                 Cost = Cost2
 
@@ -915,15 +916,15 @@ class DefensiveQAgent(ApproximateQAgent):
                              not gameState.hasWall(half_position[0], height_position)]
             avoidPositions = [myPos]
 
-            startPosition = None
             index_clog = 0
             for a, i in Prechaser:
-                Path, Position, Cost = self.aStarSearch(gameState, goalPositions, startPosition=startPosition,
-                                                   avoidPositions=avoidPositions, returngoalPosition=False,
-                                                   returnCost=True)
+                Path, Position, Cost = self.aStarSearch(gameState, goalPositions, startPosition=a,
+                                                        avoidPositions=avoidPositions, returngoalPosition=False,
+                                                        returnCost=True)
                 if Cost > width * height:
                     index_clog = i
                     break
+            if index_clog == 0: return False
 
             # print("NOW===",myPrePos==myPos, myPrePos, myPos, index_state, len(Prechaser))
             while (index_state != -2):
@@ -940,7 +941,7 @@ class DefensiveQAgent(ApproximateQAgent):
             # print("AFTER===",myPrePos==myPos, myPrePos, myPos, index_state, len(Prechaser))
             Preenemies = [myPreState.getAgentState(i) for i in gmagent.getOpponents(myPreState)]
             Prechaser = [a.getPosition() for a in Preenemies if a.isPacman and a.getPosition() != None]
-            if len(Prechaser) > 0 and gmagent.getMazeDistance(myPrePos, Prechaser[0]) > 4: return True
+            if len(Prechaser) > 0 and gmagent.getMazeDistance(myPrePos, Prechaser[0]) >= 3: return True
 
         return False
 
