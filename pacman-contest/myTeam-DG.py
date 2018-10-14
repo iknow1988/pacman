@@ -383,7 +383,7 @@ class OffensiveUCT(UCTBasedAgent):
         self.MAX_ITERATIONS = 10
         self.MAX_EXPLORATION = 15
         self.MAX_FOOD_CARRYING = 3
-        self.cp = 0.5
+        self.cp = 1
         if not self.red:
             self.goal_color= (100, 100, 100)
             self.exploration_color=(1, 0, 0)
@@ -391,7 +391,7 @@ class OffensiveUCT(UCTBasedAgent):
             self.goal_color= (0, 1, 0)
             self.exploration_color=(0, 0, 1)
         
-        self.debug=False
+        self.debug=True
         # Variables used to verify if the agent is locked
 
     # (15s max).
