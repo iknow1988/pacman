@@ -1454,10 +1454,10 @@ class OffensiveQAgent(ApproximateQAgent):
             else:
                 self.carryLimit = 10
 
-        if len(invaders) > 0:
-            distancesToInvaders = [self.getMazeDistance(myNextPosition, a.getPosition()) for a in invaders]
-            if min(distancesToInvaders) <= 1 and not myNextState.isPacman:
-                minDistanceToInvader = -min(distancesToInvaders) * 1.0
+        # if len(invaders) > 0:
+        #     distancesToInvaders = [self.getMazeDistance(myNextPosition, a.getPosition()) for a in invaders]
+        #     if min(distancesToInvaders) <= 1 and not myNextState.isPacman:
+        #         minDistanceToInvader = -min(distancesToInvaders) * 1.0
 
         # eaten a food, giving another food to eat
         if myCurrentPosition == self.target_position and len(foodList)>0:
@@ -1721,7 +1721,7 @@ class DefensiveQAgent(ApproximateQAgent):
             self.alternativePath = []
 
         # if part for offensive and else part for defensive
-        if self.target_position == myPosition:
+        if self.target_position == myPosition and not myCurrentState.isPacman:
             if len(foodListDefending) > 6:
                 distances = []
                 for entrance in self.entrances:
@@ -1762,7 +1762,7 @@ class DefensiveQAgent(ApproximateQAgent):
                 self.target_position = minDistantCapsule
 
         # teammate ate the food and update to new target
-        if newState.isPacman and self.lastState:
+        if myCurrentState.isPacman and self.lastState:
             foodInLastState = self.target_position in self.getFood(self.lastState).asList()
             foodNotInPresentState = self.target_position not in foodListToEat
             if foodInLastState and foodNotInPresentState and len(foodListToEat) > 2:
