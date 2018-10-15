@@ -566,8 +566,8 @@ class DefensiveQAgent(ApproximateQAgent):
 
     def __init__(self, index, **args):
         ApproximateQAgent.__init__(self, index, **args)
-        self.carryLimit = math.ceil(self.max_score * 0.20)
         self.target_position = None
+        self.initial = False
         self.alternativePath = []
         self.initialFoodListDefending = []
         self.initialFoodListToEat = []
@@ -583,6 +583,7 @@ class DefensiveQAgent(ApproximateQAgent):
         self.alternativePath = []
         self.initialFoodListDefending = self.getFoodYouAreDefending(gameState).asList()
         self.initialFoodListToEat = self.getFood(gameState).asList()
+        self.carryLimit = math.ceil(self.max_score * 0.20)
 
     def getFeatures(self, state, action):
         features = util.Counter()
@@ -602,20 +603,19 @@ class DefensiveQAgent(ApproximateQAgent):
         if len(capsules) > 0:
             minDistantCapsule = min(capsules, key=lambda x: self.getMazeDistance(newPosition, x))
 
+        if myCurrentPosition in self.entrances:
+            self.initial = True
         # no need of alternative path being a ghost
         if not newState.isPacman:
             self.alternativePath = []
 
         # Team is losing and go offensive
         halfFood = len(self.initialFoodListDefending) * 1.0 / 2.0
-        if (self.getScore(state) != 0 and self.getScore(state) <= int(self.max_score / 8.0) and len(
+        if self.initial and (self.getScore(state) != 0 and self.getScore(state) <= int(self.max_score / 8.0) and len(
                 foodListDefending) > halfFood and len(
                 foodListToEat) > 2 and newState.numCarrying <= self.carryLimit) \
                 and len(foodListDefending) != len(self.initialFoodListDefending):
             self.target_position = min(foodListToEat, key=lambda x: self.getMazeDistance(newPosition, x))
-
-            # print "ATTACK", self.getScore(state), int(self.max_score / 8.0), len(
-            #     foodListDefending), halfFood, newState.numCarrying
 
         # goal aware target for defenses
         if self.target_position == myCurrentPosition:
@@ -675,9 +675,10 @@ class DefensiveQAgent(ApproximateQAgent):
             dist_miss += self.getMazeDistance(missingFoods[0][0], newPosition)
 
         # reached carry limit go back to home
-        if newState.isPacman and not self.isOpponentScared(state) \
+        if self.initial and newState.isPacman and not self.isOpponentScared(state) \
                 and myCurrentState.numCarrying > self.carryLimit:
             self.target_position = min(self.entrances, key=lambda x: self.getMazeDistance(newPosition, x))
+            self.initial = False
 
         # End of time and go back to home
         timeLeft = state.data.timeleft * 1.0 / state.getNumAgents()
@@ -693,6 +694,9 @@ class DefensiveQAgent(ApproximateQAgent):
         if intercept:
             self.target_position = intercept
             # print "INTERCEPTING"
+
+        if  myCurrentState.isPacman and self.LoopBreakerMoniter(state):
+            self.target_position = self.minDistantEntrance
 
         features['scaredState'] = 0.0
         if newState.scaredTimer > 0:
@@ -805,14 +809,16 @@ class DefensiveQAgent(ApproximateQAgent):
 
     def chooseAction(self, gameState):
         actions = gameState.getLegalActions(self.index)
-        if not gameState.getAgentState(self.index).isPacman and self.CloggingOpponent(gameState):
+        if gameState.getAgentState(self.index).isPacman and len(self.alternativePath) > 0:
+            action = self.alternativePath.pop()
+        elif not gameState.getAgentState(self.index).isPacman and self.CloggingOpponent(gameState):
             action = 'Stop'
         elif gameState.getAgentState(self.index).isPacman and self.CheckIfAgentStucking(gameState):
             actions, goalDestination = self.FindAlternativeFood(gameState)
             if actions:
                 self.alternativePath = actions
                 action = self.alternativePath.pop()
-                # self.target_position = goalDestination
+                self.target_position = goalDestination
             else:
                 actions = gameState.getLegalActions(self.index)
                 action = random.choice(actions)
