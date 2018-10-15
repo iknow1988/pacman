@@ -1040,6 +1040,8 @@ class DefensiveQAgent(ApproximateQAgent):
 
     def InterceptOpponents(self, gameState):
         gmagent = self
+        if len(gmagent.observationHistory) < 10:
+            return None
         walls = gameState.getWalls().asList()
         actions = [Directions.NORTH, Directions.SOUTH, Directions.EAST, Directions.WEST]
         actionVectors = [(int(Actions.directionToVector(action)[0]), int(Actions.directionToVector(action)[1])) for
