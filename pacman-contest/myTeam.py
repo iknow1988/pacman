@@ -324,7 +324,7 @@ class ApproximateQAgent(CaptureAgent):
         enemies = [state.getAgentState(i) for i in self.getOpponents(state)]
         for a in enemies:
             if not a.isPacman:
-                if a.scaredTimer > 3:
+                if a.scaredTimer > 5:
                     scared = True
                     break
 
@@ -381,7 +381,7 @@ class OffensiveQAgent(ApproximateQAgent):
             'distanceToInvader': -0.523948237607476
         })
         self.target_position = None
-        self.carryLimit = self.max_score
+        self.carryLimit = self.max_score - 2
         self.alternativePath = []
 
     def registerInitialState(self, gameState):
@@ -394,7 +394,7 @@ class OffensiveQAgent(ApproximateQAgent):
                                        key=lambda x: self.getMazeDistance(
                                            gameState.getAgentState(self.index).getPosition(),
                                            x))
-        self.carryLimit = self.max_score
+        self.carryLimit = self.max_score - 2
 
     def getFeatures(self, state, action):
         myCurrentState = state.getAgentState(self.index)
@@ -420,7 +420,7 @@ class OffensiveQAgent(ApproximateQAgent):
             if not self.isOpponentScared(successor) and minDistToGhost <= 1 and myNextState.isPacman:
                 minDistanceToGhost = minDistToGhost * 1.0
             if minDistToGhost > 5 or self.isOpponentScared(successor):
-                self.carryLimit = self.max_score
+                self.carryLimit = self.max_score - 2
             else:
                 self.carryLimit = 10
 
