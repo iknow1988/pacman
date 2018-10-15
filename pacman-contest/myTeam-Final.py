@@ -669,10 +669,8 @@ class DefensiveQAgent(ApproximateQAgent):
         dist_miss = 0.0
         if len(missingFoods) > 0  and minDistanceToInvader > 6 and\
                 not myCurrentState.isPacman and len(invaders) > 0:
-            # print "MISSING FOOD", minDistanceToInvader, newState.scaredTimer, not myCurrentState.isPacman
             self.target_position = missingFoods[0][0]
-            # for pos, i in missingFoods:
-            dist_miss += self.getMazeDistance(missingFoods[0][0], newPosition)
+            dist_miss = self.getMazeDistance(missingFoods[0][0], newPosition)
 
         # reached carry limit go back to home
         if self.initial and newState.isPacman and not self.isOpponentScared(state) \
