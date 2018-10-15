@@ -245,6 +245,9 @@ class ApproximateQAgent(CaptureAgent):
         walls = gameState.getWalls()
 
         foodList = gmagent.getFood(gameState).asList()
+        
+        for cap in gmagent.getCapsules(gameState):
+            foodList.append(cap)
 
         height = walls.height
         width = walls.width
@@ -271,7 +274,7 @@ class ApproximateQAgent(CaptureAgent):
             return None, None
         ##Here return a list and the position
         currentPath, currentPosition = self.aStarSearch(gameState, goalPositions=goalPositions, startPosition=myPos,
-                                                        avoidPositions=avoidPos, returngoalPosition=True)
+                                                   avoidPositions=avoidPos, returngoalPosition=True)
 
         steps = min(5, len(currentPath))
         stackpath = []
