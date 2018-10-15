@@ -637,7 +637,11 @@ class DefensiveQAgent(ApproximateQAgent):
         if len(invaders) > 0:
             distanceToInvaders = [self.getMazeDistance(newPosition, a.getPosition()) for a in invaders]
             minDist = min(distanceToInvaders)
-            intercept = self.InterceptOpponents(state)
+            try:
+                intercept = self.InterceptOpponents(state)
+            except IndexError:
+                intercept = None
+                print "Intercept error"
             if not intercept and not myCurrentState.isPacman and newState.scaredTimer <= 0:
                 minDistanceToInvader = min(distanceToInvaders)
 
