@@ -434,7 +434,6 @@ class OffensiveQAgent(ApproximateQAgent):
             distancesToInvaders = [self.getMazeDistance(myNextPosition, a.getPosition()) for a in invaders]
             if myNextState.isPacman and min(distancesToInvaders) <= 1:
                 minDistanceToInvader = min(distancesToInvaders) * 1.0
-                print "avoiding invader"
 
         # eaten a food, giving another food to eat
         if myCurrentPosition == self.target_position and len(foodList) > 2:
@@ -448,7 +447,6 @@ class OffensiveQAgent(ApproximateQAgent):
         if not self.isOpponentScared(state) and len(ghosts) > 0 and \
             minDistToGhost <= 5 and myCurrentState.numCarrying >= self.carryLimit:
             self.target_position = min(self.entrances, key=lambda x: self.getMazeDistance(myNextPosition, x))
-            print "reached carry limit offensive"
 
         # End of time and go back to home
         timeLeft = state.data.timeleft * 1.0 / state.getNumAgents()
@@ -471,7 +469,7 @@ class OffensiveQAgent(ApproximateQAgent):
                 self.target_position = min(foodList, key=lambda x: self.getMazeDistance(myNextPosition, x))
 
         # Loop Braking monitor
-        if not self.isOpponentScared(state) and self.LoopBreakerMoniter(state):
+        if  ((len(ghosts) != 0) or not self.isOpponentScared(state)) and self.LoopBreakerMoniter(state):
             self.target_position = min(self.entrances, key=lambda x: self.getMazeDistance(myNextPosition, x))
 
         features["bias"] = 1.0
@@ -608,7 +606,7 @@ class DefensiveQAgent(ApproximateQAgent):
             self.alternativePath = []
 
         # goal aware target for defenses
-        if self.target_position == myCurrentPosition and not myCurrentState.isPacman:
+        if self.target_position == myCurrentPosition and not newState.isPacman:
             foodLeftToDefend = len(foodListDefending)* 1.0
             if foodLeftToDefend > len(self.initialFoodListDefending) * 1.0 / 2:
                 distances = []
@@ -640,13 +638,15 @@ class DefensiveQAgent(ApproximateQAgent):
         if newState.scaredTimer > 0 and len(foodListToEat) > 2 and\
                 len(foodListDefending) > len(self.initialFoodListDefending) * 1.0 / 2:
             self.target_position = min(foodListToEat, key=lambda x: self.getMazeDistance(newPosition, x))
+            print "SCArED", newState.scaredTimer
 
         # Team is losing and go offensive
         halfFood = len(self.initialFoodListDefending) * 1.0 / 3.0
-        if (self.getScore(state) != 0 and self.getScore(state) <= self.max_score/4.0 and len(foodListDefending) > halfFood and len(
+        if (self.getScore(state) != 0 and self.getScore(state) <= self.max_score/6.0 and len(foodListDefending) > halfFood and len(
                 foodListToEat) > 2 and myCurrentState.numCarrying <= self.carryLimit)\
                 and len(foodListDefending) != len(self.initialFoodListDefending):
-            self.target_position = min(foodListToEat, key=lambda x: self.getMazeDistance(newPosition, x))
+                self.target_position = min(foodListToEat, key=lambda x: self.getMazeDistance(newPosition, x))
+                print "ATTACK", self.max_score/6.0, ':' ,len(foodListDefending), ' > ' , halfFood, ":" ,myCurrentState.numCarrying
 
         # Eat capsule if it is near
         if myCurrentState.isPacman and len(capsules) > 0 and not self.isOpponentScared(state):
@@ -668,13 +668,6 @@ class DefensiveQAgent(ApproximateQAgent):
             self.target_position = missingFoods[0][0]
             # for pos, i in missingFoods:
             dist_miss += self.getMazeDistance(missingFoods[0][0], newPosition)
-
-        if len(missingFoods) == 0 and len(invaders) == 0:
-            distances = []
-            for entrance in self.entrances:
-                distances.append([self.getMazeDistance(food, entrance) for food in foodListDefending])
-            bestLocations = [a for a, v in zip(self.entrances, distances) if v == min(distances)]
-            self.target_position = random.choice(bestLocations)
 
         # reached carry limit go back to home
         if newState.isPacman and not self.isOpponentScared(state) \
