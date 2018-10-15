@@ -472,7 +472,7 @@ class OffensiveQAgent(ApproximateQAgent):
         features['distanceToInvader'] = minDistanceToInvader
         features['targetPosition'] = self.getMazeDistance(myNextPosition, self.target_position) * 1.0 / self.gridSize
 
-        self.debugDraw(self.target_position, (1, 0, 0), clear=True)
+        # self.debugDraw(self.target_position, (1, 0, 0), clear=True)
 
         return features
 
@@ -705,7 +705,7 @@ class DefensiveQAgent(ApproximateQAgent):
         features["bias"] = 1.0
         features['numOfInvaders'] = len(invaders) / 2
 
-        self.debugDraw(self.target_position, (1, 1, 1), clear=True)
+        # self.debugDraw(self.target_position, (1, 1, 1), clear=True)
 
         return features
 
