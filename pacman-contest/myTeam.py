@@ -373,12 +373,19 @@ class OffensiveQAgent(ApproximateQAgent):
     def __init__(self, index, **args):
         ApproximateQAgent.__init__(self, index, **args)
         self.filename = "final.offensive.agent.weights"
+        # self.weights = util.Counter({
+        #     'distanceToGhost': -1.1817616960168724,
+        #     'bias': -4.807251464599814,
+        #     'numOfGhosts': -0.3594832835217913,
+        #     'targetPosition': -22.31644664126268,
+        #     'distanceToInvader': -0.523948237607476
+        # })
         self.weights = util.Counter({
-            'distanceToGhost': -1.1817616960168724,
-            'bias': -4.807251464599814,
-            'numOfGhosts': -0.3594832835217913,
-            'targetPosition': -22.31644664126268,
-            'distanceToInvader': -0.523948237607476
+            'distanceToGhost': -1.0768358851323492,
+            'bias': -4.147682984008162,
+            'numOfGhosts': -0.05644873826866754,
+            'targetPosition': -25.498085587786345,
+            'distanceToInvader': -0.5606343651789838
         })
         self.target_position = None
         self.carryLimit = self.max_score
@@ -565,14 +572,23 @@ class DefensiveQAgent(ApproximateQAgent):
         self.alternativePath = []
         self.initialFoodListDefending = []
         self.initialFoodListToEat = []
+        # self.weights = util.Counter({
+        #     'bias': -4.7358416969746395,
+        #     'missingFoodDistance': -4.443376568936904,
+        #     'distanceToEntrance': -14.989341544103803,
+        #     'scaredState': 6.2021608272609905,
+        #     'isPacman': 0.07327131977082438,
+        #     'numOfInvaders': 0.7315522476852717,
+        #     'invaderDistance': -26.17572385337668
+        # })
         self.weights = util.Counter({
-            'bias': -4.7358416969746395,
-            'missingFoodDistance': -4.443376568936904,
-            'distanceToEntrance': -14.989341544103803,
-            'scaredState': 6.2021608272609905,
-            'isPacman': 0.07327131977082438,
-            'numOfInvaders': 0.7315522476852717,
-            'invaderDistance': -26.17572385337668
+            'bias': -6.759930737474148,
+            'missingFoodDistance': -3.695443786591226,
+            'distanceToEntrance': -21.425383326946474,
+            'scaredState': 5.287623186637087,
+            'isPacman': 1.3658901367218677,
+            'numOfInvaders': 1.7136139878736802,
+            'invaderDistance': -27.397380180457326
         })
 
     def registerInitialState(self, gameState):
@@ -641,7 +657,7 @@ class DefensiveQAgent(ApproximateQAgent):
                 intercept = self.InterceptOpponents(state)
             except IndexError:
                 intercept = None
-                print "Intercept error"
+                # print "Intercept error"
             if not intercept and not myCurrentState.isPacman and newState.scaredTimer <= 0:
                 minDistanceToInvader = min(distanceToInvaders)
 
