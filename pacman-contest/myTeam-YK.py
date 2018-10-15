@@ -989,28 +989,6 @@ def CornerOpponent(gmagent, gameState):
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     
     
 def EscapePathForOpponent(gmagent, gameState, returngoalPosition=False):
@@ -1034,13 +1012,28 @@ def EscapePathForOpponent(gmagent, gameState, returngoalPosition=False):
     myPos = gmagent.getCurrentObservation().getAgentPosition(gmagent.index)
     enemies = [gameState.getAgentState(i) for i in gmagent.getOpponents(gameState)]
     enemiesPacman = [a.getPosition() for a in enemies if a.isPacman and a.getPosition() != None]
-        
+    if len(enemiesPacman)==0:        
+        return []
     walls = gameState.getWalls()
     height = walls.height
     width = walls.width
     walls = walls.asList()
 
     half_position=(int(gameState.data.layout.width/2-gmagent.red*(-1)),int(gameState.data.layout.height/2))
+    
+    X_half=gameState.data.layout.width/2-gmagent.red*(-1)
+    X_opp = enemiesPacman[0][0]
+    X_mypos = myPos[0]
+    
+    X_diff=(X_opp-X_half)*(X_opp-X_mypos)
+    
+    
+    half_position=(min(max(X_mypos - (1 if X_opp>=X_mypos else -1),3),width-3), 1)
+    
+    if X_diff<0 or X_opp==X_mypos :
+        half_position=(int(gameState.data.layout.width/2-gmagent.red*(-1)),int(gameState.data.layout.height/2))
+    
+    
     while(gameState.hasWall(half_position[0],half_position[1])):
         half_position=(half_position[0],half_position[1]-1) 
     startPos=enemiesPacman[0]
@@ -1059,10 +1052,10 @@ def EscapePathForOpponent(gmagent, gameState, returngoalPosition=False):
                     if (posX, posY) in goalPositions:
                         goalPositions.remove((posX,posY))
         
-    if len(enemiesPacman)!=0:
-        
-        return aStarSearch(gmagent, gameState, goalPositions=goalPositions, startPosition=startPos, avoidPositions=avoidPos, returngoalPosition=False)
-    return [] 
+    if len(goalPositions)==0:
+        return None
+    return aStarSearch(gmagent, gameState, goalPositions=goalPositions, startPosition=startPos, avoidPositions=avoidPos, returngoalPosition=False)
+
 
 
 def InterceptOpponents(gmagent, gameState):   
@@ -1071,26 +1064,29 @@ def InterceptOpponents(gmagent, gameState):
     actionVectors = [(int(Actions.directionToVector(action)[0]), int(Actions.directionToVector(action)[1])) for action in actions]
     
     myPos = gmagent.getCurrentObservation().getAgentPosition(gmagent.index)
+    index_use = [i for i in gmagent.getOpponents(gameState)]
     enemies = [gameState.getAgentState(i) for i in gmagent.getOpponents(gameState)]
     enemiesPacman = [a.getPosition() for a in enemies if a.isPacman and a.getPosition() != None]
     if len(enemiesPacman)==0:
         return None ##JUST IN CASE
     currentPos = enemiesPacman[0]
     
+    index_use = index_use[0]
     
     possiblePositions = [(currentPos[0] + vector[0], currentPos[1] + vector[1]) for vector, action in zip(actionVectors, actions)]
     legalPositions = [position for position in possiblePositions if position not in walls]
     if len(gmagent.observationHistory) > 2:
         myPreState = gmagent.observationHistory[-2]
         #myPrePos = myPreState.getAgentPosition(gmagent.index)
-        Preenemies = [myPreState.getAgentState(i) for i in gmagent.getOpponents(myPreState)]
+        Preenemies = [myPreState.getAgentState(i) for i in gmagent.getOpponents(myPreState) if i == index_use]
         Prechaser = [a.getPosition() for a in Preenemies if a.isPacman and a.getPosition() != None]
         if len(Prechaser)==0:
            return None
         if (gmagent.getMazeDistance(myPos, enemiesPacman[0]) < gmagent.getMazeDistance(myPos, Prechaser[0])): return None
-
-    if len(legalPositions)>2:
-        return None
+    ##========##
+    #if len(legalPositions)>2:
+    #    return None
+    ##========##
     OpponentPath=EscapePathForOpponent(gmagent, gameState)
     if len(OpponentPath)==0:
         return None
@@ -1108,11 +1104,18 @@ def InterceptOpponents(gmagent, gameState):
         
     AlternativePath, GoalPosition = aStarIntercept(gmagent, gameState, goalPos, startPos, avoidPos, enemiesPacman[0], returngoalPosition=True)
     if len(AlternativePath)<=lenParameter:
+        print("MINDFUL", GoalPosition)
         return GoalPosition    
     return None
 
 
 
+
+
+
+
+
+##DOUBLE CHECKED!
 
 def aStarIntercept(gmagent, gameState, goalPositions, startPosition, avoidPositions, OriginalPosition, returngoalPosition=False, returnCost= False):
     """
@@ -1160,9 +1163,6 @@ def aStarIntercept(gmagent, gameState, goalPositions, startPosition, avoidPositi
     else:
         return currentPath
     return currentPath
-
-
-
 
 
 
