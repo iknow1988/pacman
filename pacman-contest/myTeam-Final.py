@@ -786,9 +786,10 @@ class DefensiveQAgent(ApproximateQAgent):
         if myCurrentState.isPacman and len(ghosts) > 0:
             distancesToGhosts = [self.getMazeDistance(myCurrentPosition, a.getPosition()) for a in ghosts]
             if len(ghosts) > 0 and not self.isOpponentScared(gameState) and min(
-                    distancesToGhosts) <= 5 and myCurrentState.isPacman:
-                if len(actions) > 0:
-                    actions = self.getSafeActions(gameState, actions)
+                    distancesToGhosts) <= 7 and myCurrentState.isPacman:
+                b = self.getSafeActions(gameState, actions)
+                if len(b) > 0:
+                    actions = b
         values = [self.getQValue(gameState, a) for a in actions]
 
         maxValue = max(values)
