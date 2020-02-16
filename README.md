@@ -53,7 +53,7 @@ We defined a finite number of simulations to draw an MCT and Q(s, a) value if th
   - Sensitive to the missing states in simulations
 
 For example, for a particular iteration, here we can see the result of the simulation, sometimes we missed good moves because it was not included in the results. 
-![UCT_Defensive_Exploration](/uploads/dea0420e7d8879b3ef7ccb63bce61d7a/UCT_Defensive_Exploration.jpg)
+![UCT_Defensive_Exploration](1UCT_Defensive_Exploration.jpg)
 
 ## Approximate Q Learning with reward shaping
 Balance exploration and exploitation is difficult, the “Fear of Missing Out” motivated us to work on a different approach. We kept the same assumptions from the previous analysis, that is: 
@@ -134,11 +134,11 @@ Given that we can have a big number of game states, approximation methods helped
 
 For example, it is shown in the next picture (defensive agent) the training results initializing all weights with 0 for 34 episodes, *target position* tend to have a high negative value which made our agents take actions where the distance is minimum. In the same way, the *distance to invader* and *distance to ghost* (avoid ghosts) have the same behaviour.  
 
-![DAL](/uploads/bab03a233421311e755ccd4f85762e03/DAL.png)
+![DAL](2DAL.png)
 
 In the offensive agent training, it is shown int the next picture how the *distance to entrance* has a higher weight with negative values causing our agent to take the action with the minimum distance to this position. The same behaviour is seen for *distance to invaders* getting negative values in features.  *Missing food distance* was updated when our enemy eats and it was affected by strategies.
 
-![OAL](/uploads/d82e0ef574a65c93caea0886cd10d8c6/OAL.png)
+![OAL](3OAL.png)
 
 ## A-star algorithm
 Classical Planning is implemented to solve specific tasks, served as an assistant to the Q-learning agent. The idea is to use it to do tasks like planning an escape path, predicting our opponent’s escape path. Instead of taking a single goal position, in this algorithm, we took a list of goal positions and designed heuristic function to work along with that. In this function, we have a starting position, a list of avoiding positions as well as a list of goal positions. It is designed this way because we are interested in going to multiple goal positions and avoiding multiple positions in the game. For example, finding the optimal path to the nearest food avoiding positions that are very close to our opponent’s ghosts.
@@ -164,7 +164,7 @@ Classical Planning is implemented to solve specific tasks, served as an assistan
   - Only works with proper heuristic function
 
 For example, it is shown in the image how we tried to predict the escape path the opponent will choose based on the A star search result:
-![intercept](/uploads/0588d4ed918f7a6d53f88e3410d26549/intercept.jpg)
+![intercept](4intercept.jpg)
 
 # Summary
 | Layout              | Agent               | Winning Rate | Score                      | Time                 | Best Competition Rank  | Winning Rate competition |
